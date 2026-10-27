@@ -1,26 +1,137 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* TopGaffer: floodlit-pitch dark theme. One accent (volt), three signal colours. */
+@theme {
+  --color-ink: #06080a;
+  --color-pitch: #0b0f12;
+  --color-surface: #11161a;
+  --color-raised: #171e23;
+  --color-line: rgb(255 255 255 / 0.07);
+  --color-line-strong: rgb(255 255 255 / 0.13);
+  --color-text: #eef2ef;
+  --color-muted: #8b9690;
+  --color-faint: #5b6560;
+  --color-volt: #d4ff3a;
+  --color-volt-deep: #a8d11a;
+  --color-good: #3ddc97;
+  --color-warn: #ffb547;
+  --color-bad: #ff5d5d;
+  --color-info: #6ab7ff;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Chart series, validated as a pair on the dark surface (CVD ΔE 28, contrast ≥ 3:1).
+     The bright volt accent is too light for a data mark, so "you" uses a deeper step of it. */
+  --color-series-expert: #3987e5;
+  --color-series-you: #7f9f0f;
+  --color-series-avg: rgb(255 255 255 / 0.32);
+
+  --font-display: var(--font-bricolage);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --animate-rise: rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-glow: glow 3.2s ease-in-out infinite;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes glow {
+    0%,
+    100% {
+      opacity: 0.55;
+    }
+    50% {
+      opacity: 1;
+    }
   }
 }
 
+html {
+  color-scheme: dark;
+  background: var(--color-ink);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-ink);
+  color: var(--color-text);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Faint pitch markings + floodlight glow behind every screen. */
+.pitch-bg {
+  background:
+    radial-gradient(50rem 28rem at 0% -5%, rgb(212 255 58 / 0.06), transparent 60%),
+    radial-gradient(60rem 30rem at 85% -10%, rgb(106 183 255 / 0.05), transparent 60%),
+    radial-gradient(40rem 30rem at -10% 10%, rgb(61 220 151 / 0.05), transparent 60%),
+    repeating-linear-gradient(90deg, transparent 0 79px, rgb(255 255 255 / 0.018) 79px 80px),
+    var(--color-ink);
+  background-attachment: fixed;
+}
+
+/* In the components layer so utility classes (gradients, rings) on a card can override it. */
+@layer components {
+  /* Three surface levels (ink page, surface card, raised popover) plus a lit top edge for depth. */
+  .card {
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.03), transparent 45%), var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: 1.25rem;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.06),
+      0 18px 40px -24px rgb(0 0 0 / 0.85);
+  }
+
+  .num {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  .eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+}
+
+.stagger > * {
+  animation: var(--animate-rise);
+}
+.stagger > *:nth-child(2) {
+  animation-delay: 60ms;
+}
+.stagger > *:nth-child(3) {
+  animation-delay: 120ms;
+}
+.stagger > *:nth-child(4) {
+  animation-delay: 180ms;
+}
+.stagger > *:nth-child(5) {
+  animation-delay: 240ms;
+}
+.stagger > *:nth-child(n + 6) {
+  animation-delay: 300ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+::selection {
+  background: var(--color-volt);
+  color: var(--color-ink);
 }
