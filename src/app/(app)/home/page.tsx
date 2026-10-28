@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Timer } from "lucide-react";
+import { AlertTriangle, ArrowRight, ArrowUpRight, Brain, CheckCircle2, Info } from "lucide-react";
 import { useManager } from "@/components/app-shell";
-import { CountUp, ErrorCard, Skeleton, Stat, TeamBadge, ToneChip } from "@/components/ui";
+import { ChartCard, ColumnChart, LineChart, SERIES, Sparkline, compact } from "@/components/charts";
+import { CountUp, ErrorCard, Skeleton, TeamBadge } from "@/components/ui";
 import { fmtDeadline, fmtRank, fmtSigned, pct, timeUntil } from "@/lib/format";
-import type { ManagerProfile } from "@/lib/fpl/types";
+import type { Lesson, ManagerProfile } from "@/lib/fpl/types";
 import { useNow } from "@/lib/use-now";
 
 export default function HomePage() {
@@ -15,232 +16,252 @@ export default function HomePage() {
   return <Home profile={profile} />;
 }
 
+/*
+ * Home is organised around three questions, in reading order:
+ *   1. Decisions: what needs attention before the next deadline (the featured panel)
+ *   2. Performance: how the season is going (points lost, trend cards, season chart)
+ *   3. Insights: what TopGaffer has learned (lessons, rank journey)
+ */
 function Home({ profile }: { profile: ManagerProfile }) {
-  const { stats } = profile;
   const now = useNow();
   const first = profile.managerName.split(" ")[0];
-  const last = profile.gameweeks.at(-1);
-  const breakdown = [
-    { label: "Captain misses", value: stats.captainMissed, color: "bg-warn" },
-    { label: "Left on bench", value: stats.benchPoints, color: "bg-info" },
-    { label: "Hits that didn't pay", value: stats.hitLoss, color: "bg-bad" },
-  ];
-  const total = Math.max(1, stats.pointsLost);
-
-  const lastGw = profile.gameweeks.at(-1);
+  const gws = profile.gameweeks;
+  const last = gws.at(-1);
+  const prev = gws.at(-2);
+  const ranked = rankLessons(profile.lessons);
 
   return (
-    <div className="stagger space-y-5">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="eyebrow">
-            GW{profile.currentGw} · {profile.teamName}
-          </p>
-          <h1 className="mt-0.5 text-2xl font-semibold tracking-tight">
-            {greeting(now)}, {first}.
-          </h1>
-        </div>
-        <dl className="grid grid-cols-3 divide-x divide-line rounded-xl border border-line bg-surface">
-          {[
-            { label: "Total points", value: profile.totalPoints.toLocaleString("en-GB") },
-            { label: "Overall rank", value: fmtRank(profile.overallRank) },
-            { label: `GW${lastGw?.gw ?? "–"} points`, value: lastGw?.points ?? "–" },
-          ].map((k) => (
-            <div key={k.label} className="px-4 py-2.5 sm:px-6">
-              <dt className="text-xs text-muted">{k.label}</dt>
-              <dd className="num mt-0.5 text-base font-semibold">{k.value}</dd>
-            </div>
-          ))}
-        </dl>
+    <div className="stagger space-y-6">
+      <header>
+        <p className="text-sm text-muted">
+          {greeting(now)}, {first}
+        </p>
+        <h1 className="mt-0.5 text-3xl font-semibold tracking-tight">Dashboard</h1>
       </header>
 
+      {/* 1 · Decisions + headline performance */}
       <div className="grid gap-5 xl:grid-cols-12">
-        {/* The one number that matters */}
-        <section className="card relative overflow-hidden p-5 xl:col-span-5">
-          <p className="eyebrow">Points lost to your decisions</p>
-          <p className="mt-2 text-5xl font-semibold tracking-tight text-warn">
-            <span className="mr-0.5">−</span>
-            <CountUp value={stats.pointsLost} />
-          </p>
-          <p className="mt-2 max-w-md text-sm text-muted">
-            That&apos;s {(stats.pointsLost / Math.max(1, profile.gameweeks.length)).toFixed(1)} pts a week, compared with making the
-            best call available from your own squad.
-          </p>
-          <div className="mt-6 flex h-2.5 overflow-hidden rounded-full bg-white/5">
-            {breakdown.map((b) => (
-              <div key={b.label} className={`${b.color} transition-all`} style={{ width: `${(b.value / total) * 100}%` }} />
-            ))}
-          </div>
-          <dl className="mt-4 grid grid-cols-3 gap-3">
-            {breakdown.map((b) => (
-              <div key={b.label}>
-                <dt className="flex items-center gap-1.5 text-xs text-muted">
-                  <span className={`size-2 shrink-0 rounded-full ${b.color}`} />
-                  {b.label}
-                </dt>
-                <dd className="num mt-1 text-lg font-semibold">{b.value}</dd>
-              </div>
-            ))}
-          </dl>
-        </section>
+        <FocusPanel profile={profile} topLesson={ranked[0]} now={now} />
+        <PointsLost profile={profile} />
+      </div>
 
-        {/* Deadline call to action */}
-        {profile.nextGw && (
-          <Link
-            href="/deadline"
-            className="card group relative flex flex-col justify-between overflow-hidden p-5 transition hover:border-line-strong xl:col-span-3"
-          >
-            <div className="relative flex items-center justify-between">
-              <p className="eyebrow">GW{profile.nextGw.id} deadline</p>
-              <Timer size={16} className="text-muted" />
-            </div>
-            <div className="relative my-4">
-              <p className="num text-3xl font-semibold tracking-tight">{timeUntil(profile.nextGw.deadline, now)}</p>
-              <p className="mt-1 text-sm text-muted">{fmtDeadline(profile.nextGw.deadline)}</p>
-            </div>
-            <span className="relative inline-flex items-center justify-between rounded-lg bg-volt px-4 py-2.5 text-sm font-semibold text-ink">
-              Run deadline check
-              <ArrowRight size={18} className="transition group-hover:translate-x-1" />
-            </span>
-          </Link>
-        )}
-
-        <div className="grid grid-cols-2 gap-3 xl:col-span-4">
-          <Stat label="Captain average" value={stats.captainAvg} suffix="pts" hint="before the armband" />
-          <Stat
-            label="Best captain"
-            value={pct(stats.captainBestRate)}
-            tone={stats.captainBestRate >= 0.5 ? "strength" : "warning"}
-            hint="of gameweeks"
+      {/* 2 · Performance at a glance: each card a number with its season trend */}
+      {last && (
+        <div className="grid grid-cols-2 gap-5 xl:grid-cols-4">
+          <TrendCard
+            label={`GW${last.gw} points`}
+            value={last.points}
+            delta={{ text: `${fmtSigned(last.points - last.average)} vs avg`, good: last.points >= last.average }}
+            trend={gws.map((g) => g.points)}
+            trendLabel="Points per gameweek"
           />
-          <Stat
-            label="Hits paid off"
-            value={stats.hits ? `${stats.hitsPaidOff}/${stats.hits}` : "—"}
-            tone={stats.hits === 0 ? undefined : stats.hitsPaidOff * 2 >= stats.hits ? "strength" : "warning"}
-            hint={stats.hits ? `${stats.hitCost} pts spent` : "No hits taken"}
+          <TrendCard
+            label="Overall rank"
+            value={fmtRank(profile.overallRank)}
+            delta={
+              prev
+                ? {
+                    text: `${prev.overallRank >= last.overallRank ? "↑" : "↓"} ${compact(Math.abs(prev.overallRank - last.overallRank))} this week`,
+                    good: prev.overallRank >= last.overallRank,
+                  }
+                : undefined
+            }
+            trend={gws.map((g) => g.overallRank)}
+            invert
+            trendLabel="Overall rank per gameweek"
           />
-          <Stat
-            label="Transfers won"
-            value={stats.transferWindows ? pct(stats.transferSuccess) : "—"}
-            tone={stats.transferWindows === 0 ? undefined : stats.transferSuccess >= 0.5 ? "strength" : "warning"}
-            hint={`over ${stats.transferWindows} weeks`}
+          <TrendCard
+            label="Captain average"
+            value={profile.stats.captainAvg}
+            unit="pts"
+            delta={{ text: `best pick ${pct(profile.stats.captainBestRate)} of weeks`, good: profile.stats.captainBestRate >= 0.5 }}
+            trend={gws.map((g) => g.captain?.points ?? 0)}
+            trendLabel="Captain points per gameweek"
+          />
+          <TrendCard
+            label="Left on bench"
+            value={profile.stats.benchPoints}
+            unit="pts"
+            delta={{ text: `${(profile.stats.benchPoints / Math.max(1, gws.length)).toFixed(1)} a week`, good: false }}
+            trend={gws.map((g) => g.benchPoints)}
+            color="var(--color-info)"
+            trendLabel="Bench points per gameweek"
           />
         </div>
+      )}
 
-        <div className="xl:col-span-8">
-          <SeasonChart profile={profile} />
-        </div>
-        <div className="xl:col-span-4">{last && <LastGameweek profile={profile} />}</div>
+      <div className="grid gap-5 xl:grid-cols-12">
+        <ChartCard
+          className="xl:col-span-8"
+          title="Your season"
+          subtitle="Points per gameweek. The ring marks the average manager."
+          legend={[
+            { label: "You", color: SERIES.you, shape: "rect" },
+            { label: "Average", color: "var(--color-text)", shape: "ring" },
+          ]}
+          table={{
+            head: ["GW", "You", "Average", "Captain", "Chip"],
+            rows: gws.map((g) => [`GW${g.gw}`, g.points, g.average, g.captain ? `${profile.players[g.captain.id]?.name} (${g.captain.points})` : "—", g.chip ?? ""]),
+          }}
+        >
+          <ColumnChart
+            ariaLabel="Your points per gameweek against the average"
+            height={240}
+            markerColor="var(--color-text)"
+            columns={gws.map((g) => ({
+              label: `${g.gw}`,
+              value: g.points,
+              marker: g.average,
+              color: SERIES.you,
+              tip: (
+                <>
+                  <p className="font-semibold text-muted">GW{g.gw}</p>
+                  <p className="mt-1">
+                    <span className="num font-semibold">{g.points}</span> <span className="text-muted">you</span>
+                  </p>
+                  <p>
+                    <span className="num font-semibold">{g.average}</span> <span className="text-muted">average</span>
+                  </p>
+                  {g.captain && (
+                    <p className="mt-1 text-muted">
+                      Captain {profile.players[g.captain.id]?.name} · {g.captain.points}
+                    </p>
+                  )}
+                </>
+              ),
+            }))}
+          />
+        </ChartCard>
+        {last && <LastGameweek profile={profile} />}
+      </div>
 
-        <section className="card p-5 xl:col-span-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="eyebrow">What I&apos;ve learned about you</p>
-              <p className="mt-1 text-sm text-muted">From {profile.gameweeks.length} gameweeks of your real decisions.</p>
-            </div>
-            <Link href="/memory" className="inline-flex items-center gap-1 text-sm text-muted hover:text-text">
-              All memories <ArrowUpRight size={15} />
-            </Link>
-          </div>
-          <div className="mt-5 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
-            {profile.lessons.slice(0, 6).map((l) => (
-              <div key={l.id} className="rounded-lg border border-line p-4 transition hover:border-line-strong">
-                <ToneChip tone={l.tone} />
-                <p className="mt-2 text-[15px] leading-snug font-semibold">{l.title}</p>
-                <p className="mt-1 text-sm text-muted">{l.detail}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <div className="xl:col-span-4">
-          <RankJourney profile={profile} />
-        </div>
+      {/* 3 · Insights */}
+      <div className="grid gap-5 xl:grid-cols-12">
+        <Insights profile={profile} lessons={ranked} />
+        <RankJourney profile={profile} />
       </div>
     </div>
   );
 }
 
-/** Overall rank by gameweek. Lower is better, so the line rises as rank improves. */
-function RankJourney({ profile }: { profile: ManagerProfile }) {
-  const pts = profile.gameweeks.map((g) => ({ gw: g.gw, rank: g.overallRank }));
-  if (pts.length < 2) return null;
-  const logs = pts.map((p) => Math.log10(p.rank));
-  const lo = Math.min(...logs);
-  const hi = Math.max(...logs);
-  const W = 300;
-  const H = 120;
-  const x = (i: number) => (i / (pts.length - 1)) * W;
-  const y = (v: number) => (hi === lo ? H / 2 : ((v - lo) / (hi - lo)) * (H - 16) + 8);
-  const line = logs.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
-  const first = pts[0].rank;
-  const latest = pts[pts.length - 1].rank;
-  const improved = latest < first;
+/** The featured panel: the next decision, the lesson that matters most for it, and the action. */
+function FocusPanel({ profile, topLesson, now }: { profile: ManagerProfile; topLesson?: Lesson; now: number }) {
+  const next = profile.nextGw;
   return (
-    <section className="card h-full p-5">
-      <div className="flex items-center justify-between">
-        <p className="eyebrow">Rank journey</p>
-        <span className={`num text-xs font-semibold ${improved ? "text-good" : "text-bad"}`}>
-          {improved ? "▲" : "▼"} {Math.abs(first - latest).toLocaleString("en-GB")}
-        </span>
-      </div>
-      <p className="num mt-2 text-2xl font-semibold tracking-tight">{fmtRank(latest)}</p>
-      <p className="text-xs text-muted">from {fmtRank(first)} after GW{pts[0].gw}</p>
-      <svg viewBox={`0 -4 ${W} ${H + 8}`} className="mt-4 h-32 w-full overflow-visible" preserveAspectRatio="none" aria-hidden>
-        <defs>
-          <linearGradient id="rankFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="var(--color-series-you)" stopOpacity="0.12" />
-            <stop offset="1" stopColor="var(--color-series-you)" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <path d={`${line} L${W},${H} L0,${H} Z`} fill="url(#rankFill)" />
-        <path d={line} fill="none" stroke="var(--color-series-you)" strokeWidth="2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
-      </svg>
-      <div className="mt-1 flex justify-between text-[10px] text-faint">
-        <span className="num">GW{pts[0].gw}</span>
-        <span className="num">GW{pts[pts.length - 1].gw}</span>
+    <section className="relative overflow-hidden rounded-[1.25rem] bg-volt p-6 text-neutral-950 xl:col-span-5">
+      <div className="pointer-events-none absolute -right-16 -bottom-24 size-72 rounded-full bg-white/25 blur-3xl" />
+      <div className="relative flex h-full flex-col">
+        <p className="text-sm font-medium text-neutral-900/70">{next ? `GW${next.id} deadline` : "Season"}</p>
+        {next ? (
+          <>
+            <p className="mt-1 text-5xl font-semibold tracking-tight">{timeUntil(next.deadline, now)}</p>
+            <p className="mt-1 text-sm text-neutral-900/70">{fmtDeadline(next.deadline)}</p>
+          </>
+        ) : (
+          <p className="mt-1 text-3xl font-semibold tracking-tight">No upcoming deadline</p>
+        )}
+
+        {topLesson && (
+          <div className="mt-6 rounded-2xl bg-neutral-950/[0.08] p-4">
+            <p className="flex items-center gap-1.5 text-xs font-semibold text-neutral-900/70">
+              <Brain size={14} /> Before you decide
+            </p>
+            <p className="mt-1 text-[15px] leading-snug font-semibold">{topLesson.title}</p>
+          </div>
+        )}
+
+        <Link
+          href="/deadline"
+          className="group mt-6 inline-flex items-center justify-between rounded-xl bg-neutral-950 px-4 py-3 text-sm font-semibold text-volt transition hover:bg-neutral-900 xl:mt-auto"
+        >
+          Run deadline check
+          <ArrowRight size={18} className="transition group-hover:translate-x-1" />
+        </Link>
       </div>
     </section>
   );
 }
 
-function SeasonChart({ profile }: { profile: ManagerProfile }) {
-  const max = Math.max(...profile.gameweeks.map((g) => Math.max(g.points, g.average)), 1);
+function PointsLost({ profile }: { profile: ManagerProfile }) {
+  const { stats } = profile;
+  const parts = [
+    { label: "Captain misses", value: stats.captainMissed, color: "bg-warn" },
+    { label: "Left on bench", value: stats.benchPoints, color: "bg-info" },
+    { label: "Hits that didn't pay", value: stats.hitLoss, color: "bg-bad" },
+  ];
+  const total = Math.max(1, stats.pointsLost);
   return (
-    <section className="card h-full p-5">
-      <div className="flex items-center justify-between">
-        <p className="eyebrow">Your season</p>
-        <div className="flex items-center gap-4 text-xs text-muted">
-          <span className="flex items-center gap-1.5">
-            <span className="size-2 rounded-sm bg-[var(--color-series-you)]" /> You
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-0.5 w-3 bg-white/50" /> Average
-          </span>
+    <section className="card flex flex-col p-6 xl:col-span-7">
+      <p className="text-sm font-medium text-muted">Points lost to your decisions</p>
+      <p className="mt-1 text-6xl font-semibold tracking-tight text-warn">
+        −<CountUp value={stats.pointsLost} />
+      </p>
+      <p className="mt-2 max-w-lg text-sm text-muted">
+        About {(stats.pointsLost / Math.max(1, profile.gameweeks.length)).toFixed(1)} pts a week, compared with making the best call available
+        from your own squad.
+      </p>
+      <div className="mt-auto pt-8">
+        <div className="flex h-3 gap-0.5 overflow-hidden rounded-full">
+          {parts
+            .filter((p) => p.value > 0)
+            .map((p) => (
+              <div key={p.label} className={`${p.color} first:rounded-l-full last:rounded-r-full`} style={{ width: `${(p.value / total) * 100}%` }} />
+            ))}
         </div>
-      </div>
-      <div className="mt-6 flex h-44 items-end gap-1.5 sm:gap-2.5">
-        {profile.gameweeks.map((g) => {
-          const above = g.points >= g.average;
-          return (
-            <div key={g.gw} className="group relative flex h-full flex-1 flex-col justify-end">
-              <div
-                className="absolute inset-x-0 z-10 h-0.5 bg-white/50"
-                style={{ bottom: `${(g.average / max) * 100}%` }}
-                aria-hidden
-              />
-              <div
-                className={`mx-auto w-full max-w-6 rounded-t-[4px] transition-all group-hover:brightness-125 ${above ? "bg-[var(--color-series-you)]" : "bg-[var(--color-series-you)]/45"}`}
-                style={{ height: `${(g.points / max) * 100}%` }}
-              />
-              <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden -translate-x-1/2 rounded-lg border border-line-strong bg-raised px-2.5 py-1.5 text-xs whitespace-nowrap group-hover:block">
-                <span className="num font-semibold">{g.points}</span> pts · avg {g.average}
-                {g.chip && <span className="ml-1 text-muted">{g.chip}</span>}
-              </div>
-              <span className="num mt-2 text-center text-[10px] text-faint">{g.gw}</span>
+        <dl className="mt-5 grid grid-cols-3 gap-4">
+          {parts.map((p) => (
+            <div key={p.label}>
+              <dt className="flex items-center gap-1.5 text-xs text-muted">
+                <span className={`size-2 shrink-0 rounded-full ${p.color}`} />
+                {p.label}
+              </dt>
+              <dd className="num mt-1 text-2xl font-semibold tracking-tight">{p.value}</dd>
             </div>
-          );
-        })}
+          ))}
+        </dl>
+        <p className="mt-5 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted">
+          <span>
+            Hits paid off: <span className="text-text">{stats.hits ? `${stats.hitsPaidOff}/${stats.hits}` : "none taken"}</span>
+          </span>
+          <span>
+            Transfer weeks won:{" "}
+            <span className="text-text">{stats.transferWindows ? `${pct(stats.transferSuccess)} of ${stats.transferWindows}` : "—"}</span>
+          </span>
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function TrendCard({
+  label,
+  value,
+  unit,
+  delta,
+  trend,
+  invert,
+  color,
+  trendLabel,
+}: {
+  label: string;
+  value: number | string;
+  unit?: string;
+  delta?: { text: string; good: boolean };
+  trend: number[];
+  invert?: boolean;
+  color?: string;
+  trendLabel: string;
+}) {
+  return (
+    <section className="card flex flex-col p-5">
+      <p className="text-sm font-medium text-muted">{label}</p>
+      <p className="mt-1 text-3xl font-semibold tracking-tight">
+        {typeof value === "number" ? value.toLocaleString("en-GB") : value}
+        {unit && <span className="ml-1 text-base font-normal text-muted">{unit}</span>}
+      </p>
+      {delta && <p className={`mt-0.5 text-xs font-medium ${delta.good ? "text-good" : "text-muted"}`}>{delta.text}</p>}
+      <div className="mt-auto pt-4">
+        <Sparkline values={trend} invert={invert} color={color} label={trendLabel} />
       </div>
     </section>
   );
@@ -254,38 +275,37 @@ function LastGameweek({ profile }: { profile: ManagerProfile }) {
   const diff = g.points - g.average;
 
   return (
-    <section className="card h-full p-5">
-      <div className="flex items-center justify-between">
-        <p className="eyebrow">GW{g.gw} review</p>
-        <span className={`num text-sm font-semibold ${diff >= 0 ? "text-good" : "text-bad"}`}>{fmtSigned(diff)} vs avg</span>
+    <section className="card flex flex-col p-6 xl:col-span-4">
+      <p className="text-sm font-medium text-muted">GW{g.gw} review</p>
+      <div className="mt-1 flex items-baseline gap-3">
+        <p className="text-4xl font-semibold tracking-tight">
+          {g.points}
+          <span className="ml-1 text-base font-normal text-muted">pts</span>
+        </p>
+        <span className={`rounded-md px-1.5 py-0.5 text-xs font-semibold ${diff >= 0 ? "bg-good/15 text-good" : "bg-white/[0.06] text-muted"}`}>
+          {fmtSigned(diff)} vs avg {g.average}
+        </span>
       </div>
-      <p className="mt-2 text-3xl font-semibold tracking-tight">
-        <span className="num">{g.points}</span>
-        <span className="ml-1 text-lg font-medium text-muted">pts</span>
-      </p>
-      <ul className="mt-5 space-y-3 text-sm">
+      <ul className="mt-6 space-y-4 text-sm">
         {g.captain && (
-          <li className="flex items-center gap-3">
-            <TeamBadge team={team(g.captain.id)} />
-            <div className="min-w-0 flex-1">
+          <li className="flex gap-3">
+            <TeamBadge team={team(g.captain.id)} size={32} />
+            <div className="min-w-0">
               <p className="font-medium">
-                Captain {name(g.captain.id)} · <span className="num">{g.captain.points * g.captain.multiplier}</span> pts
+                Captain {name(g.captain.id)} · {g.captain.points * g.captain.multiplier} pts
               </p>
               <p className="text-xs text-muted">
-                {g.captainMissed === 0
-                  ? "The best captain in your team. Good call."
-                  : `${name(g.bestCaptain!.id)} would have given ${g.captainMissed} more.`}
+                {g.captainMissed === 0 ? "The best captain in your team." : `${name(g.bestCaptain!.id)} would have given ${g.captainMissed} more.`}
               </p>
             </div>
           </li>
         )}
         {moves && (
-          <li className="flex items-center gap-3">
-            <TeamBadge team={team(moves.ins[0])} />
-            <div className="min-w-0 flex-1">
+          <li className="flex gap-3">
+            <TeamBadge team={team(moves.ins[0])} size={32} />
+            <div className="min-w-0">
               <p className="font-medium">
-                {moves.ins.map(name).join(", ")} in
-                {moves.hitCost > 0 && <span className="text-bad"> (−{moves.hitCost})</span>}
+                {moves.ins.map(name).join(", ")} in{moves.hitCost > 0 && <span className="text-bad"> (−{moves.hitCost})</span>}
               </p>
               <p className="text-xs text-muted">
                 {fmtSigned(moves.gain)} pts vs {moves.outs.map(name).join(", ")} so far
@@ -293,26 +313,126 @@ function LastGameweek({ profile }: { profile: ManagerProfile }) {
             </div>
           </li>
         )}
-        <li className="flex items-center justify-between border-t border-line pt-3 text-muted">
-          <span>Bench points</span>
-          <span className="num">{g.benchPoints}</span>
-        </li>
       </ul>
+      <p className="mt-auto flex items-center justify-between pt-6 text-sm text-muted">
+        Bench points <span className="text-base font-semibold text-text">{g.benchPoints}</span>
+      </p>
+    </section>
+  );
+}
+
+const TONE_ICON = {
+  warning: { icon: AlertTriangle, cls: "text-warn", bg: "bg-warn/10" },
+  info: { icon: Info, cls: "text-info", bg: "bg-info/10" },
+  strength: { icon: CheckCircle2, cls: "text-good", bg: "bg-good/10" },
+} as const;
+
+/** Warnings first: they are what should change the next decision. */
+function rankLessons(lessons: Lesson[]) {
+  const order = { warning: 0, info: 1, strength: 2 };
+  return [...lessons].sort((a, b) => order[a.tone] - order[b.tone]);
+}
+
+function Insights({ profile, lessons }: { profile: ManagerProfile; lessons: Lesson[] }) {
+  const [top, ...rest] = lessons;
+  return (
+    <section className="card p-6 xl:col-span-8">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-semibold">What TopGaffer has learned</h2>
+          <p className="mt-0.5 text-sm text-muted">From {profile.gameweeks.length} gameweeks of your real decisions</p>
+        </div>
+        <Link href="/memory" className="inline-flex shrink-0 items-center gap-1 text-sm text-muted hover:text-text">
+          All memories <ArrowUpRight size={15} />
+        </Link>
+      </div>
+      {top ? (
+        <>
+          <LessonRow lesson={top} featured />
+          <ul className="mt-2 divide-y divide-line">
+            {rest.map((l) => (
+              <LessonRow key={l.id} lesson={l} />
+            ))}
+          </ul>
+        </>
+      ) : (
+        <p className="mt-6 text-sm text-muted">Play a few gameweeks and TopGaffer starts learning.</p>
+      )}
+    </section>
+  );
+}
+
+function LessonRow({ lesson, featured = false }: { lesson: Lesson; featured?: boolean }) {
+  const t = TONE_ICON[lesson.tone];
+  const Icon = t.icon;
+  if (featured) {
+    return (
+      <div className="mt-5 flex gap-4 rounded-2xl bg-white/[0.03] p-5">
+        <span className={`grid size-10 shrink-0 place-items-center rounded-xl ${t.bg} ${t.cls}`}>
+          <Icon size={20} />
+        </span>
+        <div className="min-w-0">
+          <p className="text-lg leading-snug font-semibold">{lesson.title}</p>
+          <p className="mt-1 text-sm text-muted">{lesson.detail}</p>
+          {lesson.evidence && <p className="mt-2 text-xs text-faint">{lesson.evidence}</p>}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <li className="flex gap-4 px-1 py-4">
+      <span className={`grid size-8 shrink-0 place-items-center rounded-lg ${t.bg} ${t.cls}`}>
+        <Icon size={16} />
+      </span>
+      <div className="min-w-0">
+        <p className="text-[15px] leading-snug font-semibold">{lesson.title}</p>
+        <p className="mt-0.5 text-sm text-muted">{lesson.detail}</p>
+      </div>
+    </li>
+  );
+}
+
+/** Overall rank by gameweek on a log scale; higher on the chart is better. */
+function RankJourney({ profile }: { profile: ManagerProfile }) {
+  const gws = profile.gameweeks;
+  if (gws.length < 2) return null;
+  const firstRank = gws[0].overallRank;
+  const latest = gws[gws.length - 1].overallRank;
+  const prev = gws[gws.length - 2].overallRank;
+  const week = prev - latest;
+  return (
+    <section className="card flex flex-col p-6 xl:col-span-4">
+      <p className="text-sm font-medium text-muted">Rank journey</p>
+      <p className="mt-1 text-3xl font-semibold tracking-tight">{fmtRank(latest)}</p>
+      <p className={`mt-0.5 text-xs font-medium ${week >= 0 ? "text-good" : "text-bad"}`}>
+        {week >= 0 ? "Up" : "Down"} {compact(Math.abs(week))} places this week · {fmtRank(firstRank)} after GW{gws[0].gw}
+      </p>
+      <div className="mt-auto pt-4">
+        <LineChart
+          ariaLabel="Overall rank by gameweek"
+          labels={gws.map((g) => `GW${g.gw}`)}
+          invert
+          log
+          height={190}
+          format={(n) => compact(n)}
+          series={[{ key: "rank", label: "Overall rank", color: SERIES.you, values: gws.map((g) => g.overallRank) }]}
+        />
+      </div>
     </section>
   );
 }
 
 function HomeSkeleton() {
   return (
-    <div className="space-y-5">
-      <Skeleton className="h-14 w-72" />
-      <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
-        <Skeleton className="h-72" />
-        <Skeleton className="h-72" />
+    <div className="space-y-6">
+      <Skeleton className="h-14 w-60" />
+      <div className="grid gap-5 xl:grid-cols-12">
+        <Skeleton className="h-80 xl:col-span-5" />
+        <Skeleton className="h-80 xl:col-span-7" />
       </div>
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-5 xl:grid-cols-4">
         {[0, 1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-28" />
+          <Skeleton key={i} className="h-40" />
         ))}
       </div>
     </div>
@@ -321,5 +441,5 @@ function HomeSkeleton() {
 
 function greeting(now: number) {
   const h = new Date(now).getHours();
-  return h < 12 ? "Morning" : h < 17 ? "Afternoon" : "Evening";
+  return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
 }

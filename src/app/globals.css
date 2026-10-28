@@ -5,10 +5,10 @@
 @theme {
   --color-ink: #121212;
   --color-pitch: #121212;
-  --color-surface: #171717;
-  --color-raised: #212121;
-  --color-line: #262626;
-  --color-line-strong: #383838;
+  --color-surface: #1c1c1c;
+  --color-raised: #262626;
+  --color-line: #2a2a2a;
+  --color-line-strong: #3a3a3a;
   --color-text: #fafafa;
   --color-muted: #a3a3a3;
   --color-faint: #737373;
@@ -89,12 +89,11 @@ body {
 
 /* In the components layer so utility classes (gradients, rings) on a card can override it. */
 @layer components {
-  /* Calm product surfaces: 12px corners, hairline border, a faint lit top edge. */
+  /* Panels: separated by a lighter surface and space, not borders. Generous 20px corners. */
   .card {
     background: var(--color-surface);
-    border: 1px solid var(--color-line);
-    border-radius: 0.75rem;
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
+    border: 1px solid transparent;
+    border-radius: 1.25rem;
   }
 
   /* Numbers use the text font with aligned digits (no monospace). */

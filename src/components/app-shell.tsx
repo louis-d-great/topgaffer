@@ -184,12 +184,10 @@ function MemoryPill({ memory }: { memory: MemorySync }) {
 
 /** Sidebar summary: the next deadline and how last gameweek went. */
 function GameweekCard({ profile }: { profile: ManagerProfile }) {
-  const now = useNow();
   const last = profile.gameweeks.at(-1);
   const prev = profile.gameweeks.at(-2);
   const move = last && prev ? prev.overallRank - last.overallRank : 0;
   const rows: [string, ReactNode][] = [];
-  if (profile.nextGw) rows.push([`GW${profile.nextGw.id} deadline`, timeUntil(profile.nextGw.deadline, now)]);
   if (last) {
     const diff = last.points - last.average;
     rows.push([

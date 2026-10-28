@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { SegmentedControl, SegmentedControlItem } from "@/components/base/segmented-control/segmented-control";
 
 /*
@@ -460,5 +460,46 @@ export function CompareMeter({
         </div>
       ))}
     </div>
+  );
+}
+
+/** A tiny trend line for stat cards: one series, no axes, the latest value marked. */
+export function Sparkline({
+  values,
+  color = SERIES.you,
+  invert = false,
+  height = 44,
+  label,
+}: {
+  values: number[];
+  color?: string;
+  /** Draw lower values higher (for ranks). */
+  invert?: boolean;
+  height?: number;
+  label: string;
+}) {
+  const id = `spark${useId().replace(/:/g, "")}`;
+  if (values.length < 2) return null;
+  const W = 120;
+  const lo = Math.min(...values);
+  const hi = Math.max(...values);
+  const span = hi - lo || 1;
+  const x = (i: number) => (i / (values.length - 1)) * W;
+  const y = (v: number) => {
+    const r = (v - lo) / span;
+    return 4 + (invert ? r : 1 - r) * (height - 8);
+  };
+  const line = values.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  return (
+    <svg viewBox={`0 0 ${W} ${height}`} preserveAspectRatio="none" className="w-full overflow-visible" style={{ height }} role="img" aria-label={label}>
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={color} stopOpacity="0.18" />
+          <stop offset="1" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={`${line} L${W},${height} L0,${height} Z`} fill={`url(#${id})`} />
+      <path d={line} fill="none" stroke={color} strokeWidth="2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
   );
 }
