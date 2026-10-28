@@ -69,7 +69,7 @@ function Dashboard({
       <section className="card relative overflow-hidden p-6">
         <div className="pointer-events-none absolute -top-24 -right-16 size-80 rounded-full bg-[var(--color-series-expert)]/15 blur-3xl" />
         <div className="relative flex flex-wrap items-start gap-5">
-          <div className="grid size-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[var(--color-series-expert)] to-info font-display text-2xl font-bold text-white">
+          <div className="grid size-12 shrink-0 place-items-center rounded-xl bg-[var(--color-series-expert)]/20 text-lg font-semibold text-text ring-1 ring-[var(--color-series-expert)]/40">
             {name
               .split(" ")
               .map((w) => w[0])
@@ -80,19 +80,19 @@ function Dashboard({
             <p className="eyebrow">
               {meta ? `${meta.platform === "youtube" ? "YouTube" : meta.platform === "x" ? "X" : "Creator"} · ${meta.country}` : "Tracked manager"} · FPL team {d.teamId}
             </p>
-            <h1 className="mt-1 font-display text-3xl font-bold tracking-tight sm:text-4xl">{name}</h1>
+            <h1 className="mt-0.5 text-2xl font-semibold tracking-tight">{name}</h1>
             <p className="mt-1 text-sm text-muted">
               {d.teamName} · {d.managerName}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               {tags.map((t) => (
-                <span key={t} className="rounded-full border border-line-strong bg-white/[0.03] px-2.5 py-1 text-xs text-text/90">
+                <span key={t} className="rounded-md border border-line px-2 py-0.5 text-xs text-muted">
                   {t}
                 </span>
               ))}
             </div>
           </div>
-          <dl className="grid w-full grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-3 lg:w-auto lg:grid-cols-6">
+          <dl className="grid w-full grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-3 lg:w-auto lg:grid-cols-6">
             {[
               { label: "Points", value: d.totalPoints.toLocaleString("en-GB") },
               { label: "Overall rank", value: fmtRank(d.overallRank) },
@@ -103,7 +103,7 @@ function Dashboard({
             ].map((k) => (
               <div key={k.label} className="bg-surface px-4 py-3">
                 <dt className="text-[11px] text-muted">{k.label}</dt>
-                <dd className={`mt-0.5 font-display text-xl font-semibold ${k.tone ?? ""}`}>{k.value}</dd>
+                <dd className={`num mt-0.5 text-base font-semibold ${k.tone ?? ""}`}>{k.value}</dd>
               </div>
             ))}
           </dl>
@@ -112,7 +112,7 @@ function Dashboard({
         <ul className="relative mt-6 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
           {insights.map((i) => (
             <li key={i} className="flex gap-2.5 rounded-xl border border-line bg-black/20 p-3 text-sm">
-              <Lightbulb size={16} className="mt-0.5 shrink-0 text-volt" />
+              <Lightbulb size={15} className="mt-0.5 shrink-0 text-faint" />
               <span className="text-text/90">{i}</span>
             </li>
           ))}
@@ -153,7 +153,7 @@ function Dashboard({
             <CompareMeter
               label="Ownership of starting XI"
               hint="higher = more template"
-              a={{ label: name.split(" ")[0], value: d.style.xiOwnership, color: SERIES.expert }}
+              a={{ label: "Them", value: d.style.xiOwnership, color: SERIES.expert }}
               b={yourDetail ? { label: "You", value: yourDetail.style.xiOwnership, color: SERIES.you } : null}
               max={60}
               format={(n) => `${n.toFixed(0)}%`}
@@ -161,7 +161,7 @@ function Dashboard({
             <CompareMeter
               label="Differentials in XI"
               hint="players under 10% owned"
-              a={{ label: name.split(" ")[0], value: d.style.differentials, color: SERIES.expert }}
+              a={{ label: "Them", value: d.style.differentials, color: SERIES.expert }}
               b={yourDetail ? { label: "You", value: yourDetail.style.differentials, color: SERIES.you } : null}
               max={6}
               format={(n) => `${n}`}
@@ -169,7 +169,7 @@ function Dashboard({
             <CompareMeter
               label="Transfers per week"
               hint="excludes chip weeks"
-              a={{ label: name.split(" ")[0], value: d.style.transfersPerWeek, color: SERIES.expert }}
+              a={{ label: "Them", value: d.style.transfersPerWeek, color: SERIES.expert }}
               b={yourDetail ? { label: "You", value: yourDetail.style.transfersPerWeek, color: SERIES.you } : null}
               max={2}
               format={(n) => n.toFixed(1)}
@@ -177,7 +177,7 @@ function Dashboard({
             <CompareMeter
               label="Captain ownership"
               hint="popular vs brave armbands"
-              a={{ label: name.split(" ")[0], value: d.style.captainOwnership, color: SERIES.expert }}
+              a={{ label: "Them", value: d.style.captainOwnership, color: SERIES.expert }}
               b={yourDetail ? { label: "You", value: yourDetail.style.captainOwnership, color: SERIES.you } : null}
               max={80}
               format={(n) => `${n.toFixed(0)}%`}
@@ -185,7 +185,7 @@ function Dashboard({
             <CompareMeter
               label="Bench points per week"
               hint="lower is better"
-              a={{ label: name.split(" ")[0], value: d.style.benchPerWeek, color: SERIES.expert }}
+              a={{ label: "Them", value: d.style.benchPerWeek, color: SERIES.expert }}
               b={yourDetail ? { label: "You", value: yourDetail.style.benchPerWeek, color: SERIES.you } : null}
               max={15}
               format={(n) => n.toFixed(1)}
@@ -433,7 +433,7 @@ function SquadCard({ d, name }: { d: ExpertDetail; name: string }) {
       </div>
       <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {POSITIONS.map((pos) => (
-          <div key={pos} className="rounded-2xl border border-line bg-black/20 p-3">
+          <div key={pos} className="rounded-xl border border-line bg-black/20 p-3">
             <p className="eyebrow mb-2">{pos}</p>
             <ul className="space-y-1.5">
               {d.squad

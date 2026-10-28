@@ -138,7 +138,7 @@ function DeadlineCheck({ data, profile, teamId }: { data: DeadlineData; profile:
   return (
     <div className="stagger">
       <PageHeader eyebrow={`Gameweek ${gw} · ${fmtDeadline(data.gw.deadline)}`} title="Deadline check">
-        <div className="flex items-center gap-2 rounded-2xl border border-line bg-surface p-1.5 text-sm">
+        <div className="flex items-center gap-2 rounded-xl border border-line bg-surface p-1.5 text-sm">
           <span className="pl-2 text-muted">Free transfers</span>
           <button onClick={() => setFt(Math.max(0, ft - 1))} className="rounded-lg p-1.5 hover:bg-white/5" aria-label="Fewer">
             <Minus size={14} />
@@ -153,7 +153,7 @@ function DeadlineCheck({ data, profile, teamId }: { data: DeadlineData; profile:
       <div className="grid gap-5 lg:grid-cols-[1.35fr_1fr] xl:grid-cols-12">
         <section className="xl:col-span-7">
           {/* Pitch: mown stripes, vignette, floodlit centre */}
-          <div className="relative overflow-hidden rounded-[1.5rem] bg-[repeating-linear-gradient(180deg,#17603a_0_56px,#124d2b_56px_112px)] px-2 pt-6 pb-8 shadow-[inset_0_0_140px_rgba(0,0,0,0.65),0_20px_40px_-20px_rgba(0,0,0,0.8)] ring-1 ring-white/10 sm:px-4">
+          <div className="relative overflow-hidden rounded-t-xl bg-[repeating-linear-gradient(180deg,#17603a_0_56px,#124d2b_56px_112px)] px-2 pt-6 pb-8 shadow-[inset_0_0_140px_rgba(0,0,0,0.65),0_20px_40px_-20px_rgba(0,0,0,0.8)] ring-1 ring-white/10 sm:px-4">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_45%_at_50%_45%,rgba(212,255,58,0.08),transparent_70%)]" />
             <PitchLines />
             <div className="relative space-y-5 sm:space-y-7">
@@ -178,7 +178,7 @@ function DeadlineCheck({ data, profile, teamId }: { data: DeadlineData; profile:
           </div>
 
           {/* Bench: the dugout, a separate strip below the pitch */}
-          <div className="relative -mt-3 rounded-b-[1.5rem] border border-line bg-[linear-gradient(180deg,#0d1114,#0a0d10)] px-3 pt-6 pb-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+          <div className="relative rounded-b-xl border border-t-0 border-line bg-[linear-gradient(180deg,#0d1114,#0a0d10)] px-3 pt-4 pb-4">
             <p className="eyebrow mb-3 text-center text-faint">Dugout</p>
             <div className="flex justify-center gap-1 sm:gap-4">
               {bench.map((p, i) => (
@@ -300,7 +300,7 @@ function PlayerChip({
     <button
       onClick={onClick}
       style={{ animationDelay: `${order * 35}ms` }}
-      className="group relative flex w-[4.4rem] animate-rise flex-col items-center rounded-2xl pt-1 pb-1 outline-none focus-visible:ring-2 focus-visible:ring-volt sm:w-24"
+      className="group relative flex w-[4.4rem] animate-rise flex-col items-center rounded-xl pt-1 pb-1 outline-none focus-visible:ring-2 focus-visible:ring-volt sm:w-24"
     >
       <span className="relative grid place-items-center transition duration-200 group-hover:-translate-y-1">
         {captain && <span className="absolute inset-0 -m-2 animate-glow rounded-full bg-volt/35 blur-lg" aria-hidden />}
@@ -464,10 +464,10 @@ function VerdictPanel({
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="eyebrow">TopGaffer&apos;s verdict</p>
-            <p className={`mt-2 font-display text-4xl font-bold tracking-tight ${level.cls}`}>{level.label}</p>
+            <p className={`mt-1 text-3xl font-semibold tracking-tight ${level.cls}`}>{level.label}</p>
             <p className="mt-1 text-sm text-muted">{sub}</p>
           </div>
-          <span className={`grid size-12 shrink-0 place-items-center rounded-2xl bg-black/30 ring-1 ring-white/10 ${level.cls}`}>
+          <span className={`grid size-12 shrink-0 place-items-center rounded-xl bg-black/30 ring-1 ring-white/10 ${level.cls}`}>
             <LevelIcon size={24} />
           </span>
         </div>
@@ -487,11 +487,11 @@ function VerdictPanel({
             },
             { label: "Bank after", value: `£${verdict.bankAfter.toFixed(1)}m`, icon: Wallet, bad: verdict.bankAfter < 0 },
           ].map(({ label, value, icon: Icon, bad }) => (
-            <div key={label} className="rounded-2xl bg-black/30 p-3 ring-1 ring-white/[0.06]">
+            <div key={label} className="rounded-xl bg-black/30 p-3 ring-1 ring-white/[0.06]">
               <dt className="flex items-center gap-1 text-[11px] text-muted">
                 <Icon size={12} /> {label}
               </dt>
-              <dd className={`mt-1 truncate font-display text-base font-semibold sm:text-xl ${bad ? "text-bad" : ""}`}>{value}</dd>
+              <dd className={`mt-1 truncate text-base font-semibold sm:text-lg ${bad ? "text-bad" : ""}`}>{value}</dd>
             </div>
           ))}
         </dl>
@@ -501,14 +501,14 @@ function VerdictPanel({
             <NoteRow key={n.id} note={n} order={i} />
           ))}
           {verdict.notes.length === 0 && (
-            <li className="rounded-2xl border border-line p-4 text-sm text-muted">
+            <li className="rounded-xl border border-line p-4 text-sm text-muted">
               No red flags from your history. Make a transfer or change your captain to see what TopGaffer remembers.
             </li>
           )}
         </ul>
 
         {locked ? (
-          <div className="mt-6 rounded-2xl border border-good/30 bg-good/[0.07] p-4">
+          <div className="mt-6 rounded-xl border border-good/30 bg-good/[0.07] p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="flex items-center gap-2 font-semibold text-good">
                 <Check size={17} /> Plan locked
@@ -516,7 +516,7 @@ function VerdictPanel({
                   {new Date(locked.savedAt).toLocaleString("en-GB", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" })}
                 </span>
               </p>
-              <button onClick={onEdit} className="text-sm font-semibold text-volt hover:underline">
+              <button onClick={onEdit} className="text-sm text-muted hover:text-text">
                 Change plan
               </button>
             </div>
@@ -562,7 +562,7 @@ function VerdictPanel({
           <button
             onClick={onLock}
             disabled={verdict.level === "blocked" || saving}
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-volt py-3.5 font-semibold text-ink shadow-[0_10px_30px_-10px_var(--color-volt)] transition hover:bg-volt-deep disabled:opacity-40 disabled:shadow-none"
+            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-volt py-3.5 font-semibold text-ink shadow-[0_10px_30px_-10px_var(--color-volt)] transition hover:bg-volt-deep disabled:opacity-40 disabled:shadow-none"
           >
             {saving ? <Loader2 size={17} className="animate-spin" /> : <Lock size={17} />}
             {saving ? "Locking on Sui…" : verdict.level === "think" ? "Lock it anyway" : "Lock my plan"}
@@ -587,7 +587,7 @@ function NoteRow({ note, order }: { note: Note; order: number }) {
   return (
     <li
       style={{ animationDelay: `${order * 60}ms` }}
-      className={`flex animate-rise gap-3 rounded-2xl border border-l-[3px] border-line p-3.5 ${t.border} ${t.bg}`}
+      className={`flex animate-rise gap-3 rounded-xl border border-l-[3px] border-line p-3.5 ${t.border} ${t.bg}`}
     >
       <Icon size={18} className={`mt-0.5 shrink-0 ${t.text}`} />
       <div className="min-w-0">

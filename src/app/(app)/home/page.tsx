@@ -33,22 +33,22 @@ function Home({ profile }: { profile: ManagerProfile }) {
     <div className="stagger space-y-5">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="eyebrow text-volt">
+          <p className="eyebrow">
             GW{profile.currentGw} · {profile.teamName}
           </p>
-          <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+          <h1 className="mt-0.5 text-2xl font-semibold tracking-tight">
             {greeting(now)}, {first}.
           </h1>
         </div>
-        <dl className="grid grid-cols-3 divide-x divide-line rounded-2xl border border-line bg-surface/70">
+        <dl className="grid grid-cols-3 divide-x divide-line rounded-xl border border-line bg-surface">
           {[
             { label: "Total points", value: profile.totalPoints.toLocaleString("en-GB") },
             { label: "Overall rank", value: fmtRank(profile.overallRank) },
             { label: `GW${lastGw?.gw ?? "–"} points`, value: lastGw?.points ?? "–" },
           ].map((k) => (
             <div key={k.label} className="px-4 py-2.5 sm:px-6">
-              <dt className="eyebrow text-[10px]">{k.label}</dt>
-              <dd className="num mt-0.5 text-lg font-semibold sm:text-xl">{k.value}</dd>
+              <dt className="text-xs text-muted">{k.label}</dt>
+              <dd className="num mt-0.5 text-base font-semibold">{k.value}</dd>
             </div>
           ))}
         </dl>
@@ -56,11 +56,10 @@ function Home({ profile }: { profile: ManagerProfile }) {
 
       <div className="grid gap-5 xl:grid-cols-12">
         {/* The one number that matters */}
-        <section className="card relative overflow-hidden p-6 sm:p-7 xl:col-span-5">
-          <div className="pointer-events-none absolute -top-20 -right-20 size-64 rounded-full bg-warn/10 blur-3xl" />
+        <section className="card relative overflow-hidden p-5 xl:col-span-5">
           <p className="eyebrow">Points lost to your decisions</p>
-          <p className="mt-3 font-display text-7xl font-bold tracking-tight text-warn 2xl:text-8xl">
-            <span className="mr-1 align-top text-5xl 2xl:text-6xl">−</span>
+          <p className="mt-2 text-5xl font-semibold tracking-tight text-warn">
+            <span className="mr-0.5">−</span>
             <CountUp value={stats.pointsLost} />
           </p>
           <p className="mt-2 max-w-md text-sm text-muted">
@@ -89,18 +88,17 @@ function Home({ profile }: { profile: ManagerProfile }) {
         {profile.nextGw && (
           <Link
             href="/deadline"
-            className="card group relative flex flex-col justify-between overflow-hidden p-6 transition hover:border-volt/40 xl:col-span-3"
+            className="card group relative flex flex-col justify-between overflow-hidden p-5 transition hover:border-line-strong xl:col-span-3"
           >
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(30rem_14rem_at_100%_0%,rgb(212_255_58/0.12),transparent)]" />
             <div className="relative flex items-center justify-between">
               <p className="eyebrow">GW{profile.nextGw.id} deadline</p>
-              <Timer size={18} className="text-volt" />
+              <Timer size={16} className="text-muted" />
             </div>
-            <div className="relative my-6">
-              <p className="num font-display text-5xl font-bold text-volt">{timeUntil(profile.nextGw.deadline, now)}</p>
+            <div className="relative my-4">
+              <p className="num text-3xl font-semibold tracking-tight">{timeUntil(profile.nextGw.deadline, now)}</p>
               <p className="mt-1 text-sm text-muted">{fmtDeadline(profile.nextGw.deadline)}</p>
             </div>
-            <span className="relative inline-flex items-center justify-between rounded-xl bg-volt px-4 py-3 font-semibold text-ink">
+            <span className="relative inline-flex items-center justify-between rounded-lg bg-volt px-4 py-2.5 text-sm font-semibold text-ink">
               Run deadline check
               <ArrowRight size={18} className="transition group-hover:translate-x-1" />
             </span>
@@ -134,21 +132,21 @@ function Home({ profile }: { profile: ManagerProfile }) {
         </div>
         <div className="xl:col-span-4">{last && <LastGameweek profile={profile} />}</div>
 
-        <section className="card p-6 xl:col-span-8">
+        <section className="card p-5 xl:col-span-8">
           <div className="flex items-center justify-between">
             <div>
               <p className="eyebrow">What I&apos;ve learned about you</p>
               <p className="mt-1 text-sm text-muted">From {profile.gameweeks.length} gameweeks of your real decisions.</p>
             </div>
-            <Link href="/memory" className="inline-flex items-center gap-1 text-sm font-semibold text-volt hover:underline">
+            <Link href="/memory" className="inline-flex items-center gap-1 text-sm text-muted hover:text-text">
               All memories <ArrowUpRight size={15} />
             </Link>
           </div>
           <div className="mt-5 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
             {profile.lessons.slice(0, 6).map((l) => (
-              <div key={l.id} className="rounded-2xl border border-line bg-white/[0.02] p-4 transition hover:border-line-strong">
+              <div key={l.id} className="rounded-lg border border-line p-4 transition hover:border-line-strong">
                 <ToneChip tone={l.tone} />
-                <p className="mt-2 font-display text-base leading-snug font-semibold">{l.title}</p>
+                <p className="mt-2 text-[15px] leading-snug font-semibold">{l.title}</p>
                 <p className="mt-1 text-sm text-muted">{l.detail}</p>
               </div>
             ))}
@@ -179,24 +177,24 @@ function RankJourney({ profile }: { profile: ManagerProfile }) {
   const latest = pts[pts.length - 1].rank;
   const improved = latest < first;
   return (
-    <section className="card h-full p-6">
+    <section className="card h-full p-5">
       <div className="flex items-center justify-between">
         <p className="eyebrow">Rank journey</p>
         <span className={`num text-xs font-semibold ${improved ? "text-good" : "text-bad"}`}>
           {improved ? "▲" : "▼"} {Math.abs(first - latest).toLocaleString("en-GB")}
         </span>
       </div>
-      <p className="num mt-3 font-display text-3xl font-semibold">{fmtRank(latest)}</p>
+      <p className="num mt-2 text-2xl font-semibold tracking-tight">{fmtRank(latest)}</p>
       <p className="text-xs text-muted">from {fmtRank(first)} after GW{pts[0].gw}</p>
       <svg viewBox={`0 -4 ${W} ${H + 8}`} className="mt-4 h-32 w-full overflow-visible" preserveAspectRatio="none" aria-hidden>
         <defs>
           <linearGradient id="rankFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="var(--color-volt)" stopOpacity="0.25" />
-            <stop offset="1" stopColor="var(--color-volt)" stopOpacity="0" />
+            <stop offset="0" stopColor="var(--color-series-you)" stopOpacity="0.12" />
+            <stop offset="1" stopColor="var(--color-series-you)" stopOpacity="0" />
           </linearGradient>
         </defs>
         <path d={`${line} L${W},${H} L0,${H} Z`} fill="url(#rankFill)" />
-        <path d={line} fill="none" stroke="var(--color-volt)" strokeWidth="2.5" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+        <path d={line} fill="none" stroke="var(--color-series-you)" strokeWidth="2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
       </svg>
       <div className="mt-1 flex justify-between text-[10px] text-faint">
         <span className="num">GW{pts[0].gw}</span>
@@ -209,12 +207,12 @@ function RankJourney({ profile }: { profile: ManagerProfile }) {
 function SeasonChart({ profile }: { profile: ManagerProfile }) {
   const max = Math.max(...profile.gameweeks.map((g) => Math.max(g.points, g.average)), 1);
   return (
-    <section className="card h-full p-6">
+    <section className="card h-full p-5">
       <div className="flex items-center justify-between">
         <p className="eyebrow">Your season</p>
         <div className="flex items-center gap-4 text-xs text-muted">
           <span className="flex items-center gap-1.5">
-            <span className="size-2 rounded-sm bg-volt" /> You
+            <span className="size-2 rounded-sm bg-[var(--color-series-you)]" /> You
           </span>
           <span className="flex items-center gap-1.5">
             <span className="h-0.5 w-3 bg-white/50" /> Average
@@ -232,12 +230,12 @@ function SeasonChart({ profile }: { profile: ManagerProfile }) {
                 aria-hidden
               />
               <div
-                className={`rounded-t-md transition-all group-hover:brightness-125 ${above ? "bg-volt" : "bg-volt/35"}`}
+                className={`mx-auto w-full max-w-6 rounded-t-[4px] transition-all group-hover:brightness-125 ${above ? "bg-[var(--color-series-you)]" : "bg-[var(--color-series-you)]/45"}`}
                 style={{ height: `${(g.points / max) * 100}%` }}
               />
               <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden -translate-x-1/2 rounded-lg border border-line-strong bg-raised px-2.5 py-1.5 text-xs whitespace-nowrap group-hover:block">
                 <span className="num font-semibold">{g.points}</span> pts · avg {g.average}
-                {g.chip && <span className="ml-1 text-volt uppercase">{g.chip}</span>}
+                {g.chip && <span className="ml-1 text-muted">{g.chip}</span>}
               </div>
               <span className="num mt-2 text-center text-[10px] text-faint">{g.gw}</span>
             </div>
@@ -256,12 +254,12 @@ function LastGameweek({ profile }: { profile: ManagerProfile }) {
   const diff = g.points - g.average;
 
   return (
-    <section className="card h-full p-6">
+    <section className="card h-full p-5">
       <div className="flex items-center justify-between">
         <p className="eyebrow">GW{g.gw} review</p>
         <span className={`num text-sm font-semibold ${diff >= 0 ? "text-good" : "text-bad"}`}>{fmtSigned(diff)} vs avg</span>
       </div>
-      <p className="mt-3 font-display text-5xl font-bold">
+      <p className="mt-2 text-3xl font-semibold tracking-tight">
         <span className="num">{g.points}</span>
         <span className="ml-1 text-lg font-medium text-muted">pts</span>
       </p>

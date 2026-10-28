@@ -46,7 +46,7 @@ export function Logo({ compact = false }: { compact?: boolean }) {
         </svg>
       </span>
       {!compact && (
-        <span className="font-display text-lg font-bold tracking-tight">
+        <span className="font-brand text-lg font-bold tracking-tight">
           Top<span className="text-volt">Gaffer</span>
         </span>
       )}
@@ -70,16 +70,16 @@ export function AppShell({ children }: { children: ReactNode }) {
     <Ctx.Provider value={{ teamId, profile: data, loading, error, memory }}>
       <div className="flex min-h-dvh w-full">
         {/* Desktop sidebar */}
-        <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-line bg-pitch/70 px-4 py-6 backdrop-blur md:flex">
+        <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-line bg-pitch px-3 py-5 md:flex">
           <Link href="/home" className="px-2">
             <Logo />
           </Link>
-          <p className="eyebrow mt-10 px-3 text-faint">Menu</p>
+          <p className="section-label mt-8 px-3">Menu</p>
           <Suspense fallback={<SideNav active={null} />}>
             <CurrentSideNav />
           </Suspense>
           {data && <GameweekCard profile={data} />}
-          <div className="mt-3 rounded-2xl border border-line bg-surface/60 p-3">
+          <div className="mt-2 rounded-lg border border-line p-2.5">
             <div className="flex items-center gap-3">
               <Avatar name={data?.managerName} />
               <div className="min-w-0">
@@ -98,17 +98,11 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Top bar */}
-          <header className="sticky top-0 z-30 flex items-center justify-between gap-4 border-b border-line bg-ink/75 px-4 py-3 backdrop-blur-xl sm:px-6 xl:px-10">
+          <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b border-line bg-ink/80 px-4 backdrop-blur-xl sm:px-6 xl:px-8">
             <div className="flex items-center gap-3">
               <span className="md:hidden">
                 <Logo compact />
               </span>
-              <div>
-                <p className="eyebrow text-faint">TopGaffer</p>
-                <Suspense fallback={<p className="font-display text-base font-semibold">&nbsp;</p>}>
-                  <CurrentTitle />
-                </Suspense>
-              </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
               <MemoryPill memory={memory} />
@@ -123,7 +117,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </header>
 
-          <main className="w-full min-w-0 flex-1 overflow-x-clip px-4 pt-6 pb-28 sm:px-6 md:pb-12 xl:px-10 xl:pt-8">{children}</main>
+          <main className="w-full min-w-0 flex-1 overflow-x-clip px-4 pt-6 pb-28 sm:px-6 md:pb-12 xl:px-8">{children}</main>
         </div>
 
         {/* Mobile tab bar */}
@@ -145,7 +139,7 @@ function Avatar({ name, size = 36 }: { name?: string; size?: number }) {
     .toUpperCase();
   return (
     <span
-      className="grid shrink-0 place-items-center rounded-full bg-gradient-to-br from-volt to-good font-display font-bold text-ink"
+      className="grid shrink-0 place-items-center rounded-full bg-white/10 font-semibold text-text ring-1 ring-white/10"
       style={{ width: size, height: size, fontSize: size * 0.38 }}
       aria-hidden
     >
@@ -158,8 +152,8 @@ function DeadlinePill({ gw, deadline }: { gw: number; deadline: string }) {
   const now = useNow();
   const hoursLeft = (new Date(deadline).getTime() - now) / 3_600_000;
   // Calm lime until the last day, then amber, then red in the final 3 hours.
-  const tone = hoursLeft < 3 ? "border-bad/40 bg-bad/10 text-bad" : hoursLeft < 24 ? "border-warn/40 bg-warn/10 text-warn" : "border-volt/30 bg-volt/10 text-volt";
-  const dot = hoursLeft < 3 ? "bg-bad" : hoursLeft < 24 ? "bg-warn" : "bg-volt";
+  const tone = hoursLeft < 3 ? "border-bad/40 bg-bad/10 text-bad" : hoursLeft < 24 ? "border-warn/40 bg-warn/10 text-warn" : "border-line bg-surface text-text";
+  const dot = hoursLeft < 3 ? "bg-bad" : hoursLeft < 24 ? "bg-warn" : "bg-good";
   return (
     <Link href="/deadline" className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition hover:brightness-125 ${tone}`}>
       <span className="relative flex size-2">
@@ -199,33 +193,41 @@ function GameweekCard({ profile }: { profile: ManagerProfile }) {
   const last = profile.gameweeks.at(-1);
   const prev = profile.gameweeks.at(-2);
   const move = last && prev ? prev.overallRank - last.overallRank : 0;
+  const rows: [string, ReactNode][] = [];
+  if (profile.nextGw) rows.push([`GW${profile.nextGw.id} deadline`, timeUntil(profile.nextGw.deadline, now)]);
+  if (last) {
+    const diff = last.points - last.average;
+    rows.push([
+      `GW${last.gw} points`,
+      <>
+        {last.points} <span className={diff >= 0 ? "text-good" : "text-bad"}>{diff >= 0 ? `+${diff}` : diff} vs avg</span>
+      </>,
+    ]);
+    rows.push([
+      "Overall rank",
+      <>
+        {compactRank(last.overallRank)}{" "}
+        {move !== 0 && <span className={move > 0 ? "text-good" : "text-bad"}>{move > 0 ? "↑" : "↓"}{compactRank(Math.abs(move))}</span>}
+      </>,
+    ]);
+  }
   return (
-    <div className="mt-auto rounded-2xl border border-line bg-[linear-gradient(160deg,rgb(212_255_58/0.08),transparent_60%)] p-3">
-      <p className="eyebrow text-[10px] text-faint">This gameweek</p>
-      {profile.nextGw && (
-        <p className="mt-1.5 flex items-baseline justify-between">
-          <span className="text-xs text-muted">GW{profile.nextGw.id} deadline</span>
-          <span className="num text-sm font-semibold text-volt">{timeUntil(profile.nextGw.deadline, now)}</span>
-        </p>
-      )}
-      {last && (
-        <>
-          <p className="mt-1 flex items-baseline justify-between">
-            <span className="text-xs text-muted">GW{last.gw} points</span>
-            <span className="num text-sm font-semibold">
-              {last.points} <span className={last.points >= last.average ? "text-good" : "text-bad"}>({last.points >= last.average ? "+" : ""}{last.points - last.average})</span>
-            </span>
-          </p>
-          <p className="mt-1 flex items-baseline justify-between">
-            <span className="text-xs text-muted">Rank move</span>
-            <span className={`num text-sm font-semibold ${move >= 0 ? "text-good" : "text-bad"}`}>
-              {move >= 0 ? "▲" : "▼"} {Math.abs(move).toLocaleString("en-GB")}
-            </span>
-          </p>
-        </>
-      )}
+    <div className="mt-auto rounded-lg border border-line p-2.5">
+      <p className="section-label">This gameweek</p>
+      <dl className="mt-2 space-y-1.5">
+        {rows.map(([k, v]) => (
+          <div key={k} className="flex items-baseline justify-between gap-2 text-xs">
+            <dt className="text-muted">{k}</dt>
+            <dd className="num font-medium text-text">{v}</dd>
+          </div>
+        ))}
+      </dl>
     </div>
   );
+}
+
+function compactRank(n: number) {
+  return n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1000 ? `${Math.round(n / 1000)}k` : `${n}`;
 }
 
 /*
@@ -246,10 +248,6 @@ function CurrentMobileNav() {
   return <MobileNav active={useActiveHref()} />;
 }
 
-function CurrentTitle() {
-  const active = useActiveHref();
-  return <p className="font-display text-base font-semibold">{NAV.find((n) => n.href === active)?.label ?? ""}</p>;
-}
 
 function SideNav({ active }: { active: string | null }) {
   return (
@@ -260,12 +258,11 @@ function SideNav({ active }: { active: string | null }) {
           <Link
             key={href}
             href={href}
-            className={`relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
-              on ? "bg-volt/10 text-volt" : "text-muted hover:bg-volt/[0.06] hover:text-text"
+            className={`relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition ${
+              on ? "bg-white/[0.06] text-text" : "text-muted hover:bg-white/[0.04] hover:text-text"
             }`}
           >
-            {on && <span className="absolute top-2 bottom-2 -left-4 w-1 rounded-r-full bg-volt" />}
-            <Icon size={18} strokeWidth={on ? 2.4 : 2} />
+            <Icon size={16} strokeWidth={2} className={on ? "text-volt" : ""} />
             {label}
           </Link>
         );
@@ -276,16 +273,16 @@ function SideNav({ active }: { active: string | null }) {
 
 function MobileNav({ active }: { active: string | null }) {
   return (
-    <nav className="fixed inset-x-3 bottom-3 z-30 grid grid-cols-5 rounded-2xl border border-line-strong bg-pitch/85 p-1.5 backdrop-blur-xl md:hidden">
+    <nav className="fixed inset-x-3 bottom-3 z-30 grid grid-cols-5 rounded-xl border border-line-strong bg-pitch/90 p-1 backdrop-blur-xl md:hidden">
       {NAV.map(({ href, label, icon: Icon }) => {
         const on = href === active;
         return (
           <Link
             key={href}
             href={href}
-            className={`flex flex-col items-center gap-0.5 rounded-xl py-2 text-[11px] font-medium transition ${on ? "bg-volt text-ink" : "text-muted"}`}
+            className={`flex flex-col items-center gap-0.5 rounded-lg py-1.5 text-[10px] font-medium transition ${on ? "bg-white/[0.08] text-text" : "text-muted"}`}
           >
-            <Icon size={19} strokeWidth={on ? 2.4 : 2} />
+            <Icon size={18} strokeWidth={2} className={on ? "text-volt" : ""} />
             {label}
           </Link>
         );

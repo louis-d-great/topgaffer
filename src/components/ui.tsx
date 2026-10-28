@@ -60,9 +60,9 @@ export function Stat({
   return (
     <div className="card p-4">
       <p className="eyebrow">{label}</p>
-      <p className={`mt-2 font-display text-3xl font-semibold ${color}`}>
+      <p className={`mt-1.5 text-2xl font-semibold tracking-tight ${color}`}>
         {value}
-        {suffix && <span className="ml-1 text-base font-medium text-muted">{suffix}</span>}
+        {suffix && <span className="ml-1 text-sm font-normal text-muted">{suffix}</span>}
       </p>
       {hint && <p className="mt-1 text-xs text-muted">{hint}</p>}
     </div>
@@ -70,24 +70,25 @@ export function Stat({
 }
 
 export const TONE = {
-  warning: { icon: AlertTriangle, text: "text-warn", bg: "bg-warn/10", ring: "ring-warn/25", label: "Watch out" },
-  strength: { icon: CheckCircle2, text: "text-good", bg: "bg-good/10", ring: "ring-good/25", label: "Strength" },
-  info: { icon: Info, text: "text-info", bg: "bg-info/10", ring: "ring-info/25", label: "Pattern" },
+  warning: { icon: AlertTriangle, text: "text-warn", dot: "bg-warn", bg: "bg-warn/10", ring: "ring-warn/25", label: "Watch out" },
+  strength: { icon: CheckCircle2, text: "text-good", dot: "bg-good", bg: "bg-good/10", ring: "ring-good/25", label: "Strength" },
+  info: { icon: Info, text: "text-info", dot: "bg-info", bg: "bg-info/10", ring: "ring-info/25", label: "Pattern" },
 } as const;
 
-export function ToneChip({ tone }: { tone: LessonTone }) {
+/** Status shown quietly: a coloured dot and a label, never colour alone. */
+export function ToneChip({ tone, detail }: { tone: LessonTone; detail?: string }) {
   const t = TONE[tone];
-  const Icon = t.icon;
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ${t.bg} ${t.text} ${t.ring}`}>
-      <Icon size={12} strokeWidth={2.5} />
+    <span className="inline-flex items-center gap-1.5 text-xs text-muted">
+      <span className={`size-1.5 rounded-full ${t.dot}`} />
       {t.label}
+      {detail && <span className="text-faint">· {detail}</span>}
     </span>
   );
 }
 
 export function Skeleton({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-2xl bg-white/[0.04] ${className}`} />;
+  return <div className={`animate-pulse rounded-xl bg-white/[0.04] ${className}`} />;
 }
 
 export function FdrPill({ difficulty }: { difficulty: number }) {
@@ -101,10 +102,10 @@ export function FdrPill({ difficulty }: { difficulty: number }) {
 
 export function PageHeader({ eyebrow, title, children }: { eyebrow: string; title: ReactNode; children?: ReactNode }) {
   return (
-    <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <header className="mb-5 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <p className="eyebrow text-volt">{eyebrow}</p>
-        <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        <p className="mt-0.5 text-sm text-muted">{eyebrow}</p>
       </div>
       {children}
     </header>
@@ -114,10 +115,10 @@ export function PageHeader({ eyebrow, title, children }: { eyebrow: string; titl
 export function ErrorCard({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
     <div className="card flex flex-col items-start gap-3 p-6">
-      <p className="font-display text-lg font-semibold">Couldn&apos;t load your data</p>
+      <p className="text-base font-semibold">Couldn&apos;t load your data</p>
       <p className="text-sm text-muted">{message}</p>
       {onRetry && (
-        <button onClick={onRetry} className="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold hover:bg-white/15">
+        <button onClick={onRetry} className="rounded-lg bg-white/10 px-4 py-2 text-sm font-semibold hover:bg-white/15">
           Try again
         </button>
       )}

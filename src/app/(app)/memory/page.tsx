@@ -1,178 +1,187 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Brain, Check, Fingerprint, Loader2, Network, Search, Sparkles, ThumbsDown, Undo2 } from "lucide-react";
+import { Check, ExternalLink, Info, Loader2, Search, Undo2 } from "lucide-react";
 import { useManager } from "@/components/app-shell";
 import { ErrorCard, PageHeader, Skeleton, ToneChip } from "@/components/ui";
-import type { Lesson } from "@/lib/fpl/types";
+import type { Lesson, LessonTone } from "@/lib/fpl/types";
 import { KEYS, useLocal, type LockedPlan } from "@/lib/store";
 import type { SavedMemory } from "@/lib/use-memory-sync";
 
 const SUGGESTIONS = ["Am I bad at captaincy?", "Do my hits pay off?", "Points left on the bench", "Who did I transfer in?"];
+const FILTERS: { key: "all" | LessonTone; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "warning", label: "Watch out" },
+  { key: "info", label: "Patterns" },
+  { key: "strength", label: "Strengths" },
+];
 
 export default function MemoryPage() {
   const { teamId, profile, error, memory } = useManager();
   const [dismissed, setDismissed] = useLocal<string[]>(KEYS.dismissed, []);
   const [plans] = useLocal<Record<string, LockedPlan>>(KEYS.plans, {});
+  const [filter, setFilter] = useState<"all" | LessonTone>("all");
 
   if (error) return <ErrorCard message={error} onRetry={() => location.reload()} />;
   if (!profile || !teamId) return <Skeleton className="h-96" />;
 
   const active = profile.lessons.filter((l) => !dismissed.includes(l.id));
   const hidden = profile.lessons.filter((l) => dismissed.includes(l.id));
+  const shown = active.filter((l) => filter === "all" || l.tone === filter);
   const locks = Object.values(plans).sort((a, b) => b.gw - a.gw);
   const name = (id: number) => profile.players[id]?.name ?? "Unknown";
   const timeline = Object.entries(memory.ledger)
     .map(([key, m]) => ({ key, ...m, text: m.text ?? memory.items.find((i) => i.key === key)?.text }))
     .sort((a, b) => order(b.key) - order(a.key));
+  const count = (tone: LessonTone) => active.filter((l) => l.tone === tone).length;
 
   return (
-    <div className="stagger">
-      <PageHeader eyebrow={`${active.length} lessons · ${memory.saved} memories on Walrus`} title="What I know about you" />
+    <div className="stagger space-y-5">
+      <PageHeader title="Memory" eyebrow={`What TopGaffer has learned from ${profile.gameweeks.length} gameweeks of your decisions`}>
+        <TechNote />
+      </PageHeader>
 
-      <div className="grid items-start gap-5 lg:grid-cols-[1.4fr_1fr] xl:grid-cols-12">
-        <AskMemory teamId={teamId} />
+      <AskMemory teamId={teamId} />
 
-        <section className="grid gap-3 xl:col-span-8 2xl:grid-cols-2">
-          {active.map((l, i) => (
+      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+        {[
+          { label: "Lessons", value: active.length },
+          { label: "Watch outs", value: count("warning"), dot: "bg-warn" },
+          { label: "Strengths", value: count("strength"), dot: "bg-good" },
+          {
+            label: "Memories on Walrus",
+            value: memory.saved,
+            hint: memory.pending ? `${memory.pending} saving` : "mainnet",
+          },
+          { label: "Plans locked", value: locks.length, hint: locks[0]?.sui ? "on Sui" : undefined },
+        ].map((s) => (
+          <div key={s.label} className="card p-4">
+            <dt className="flex items-center gap-1.5 text-xs text-muted">
+              {s.dot && <span className={`size-1.5 rounded-full ${s.dot}`} />}
+              {s.label}
+            </dt>
+            <dd className="mt-1 flex items-baseline gap-2">
+              <span className="num text-2xl font-semibold tracking-tight">{s.value}</span>
+              {s.hint && <span className="text-xs text-faint">{s.hint}</span>}
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      <section>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex gap-1 rounded-lg border border-line p-0.5">
+            {FILTERS.map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setFilter(f.key)}
+                className={`rounded-md px-3 py-1.5 text-sm transition ${filter === f.key ? "bg-white/[0.08] text-text" : "text-muted hover:text-text"}`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+          {memory.error && <p className="text-xs text-bad">{memory.error}</p>}
+        </div>
+        <div className="mt-3 grid gap-3 lg:grid-cols-2">
+          {shown.map((l) => (
             <LessonCard
               key={l.id}
               lesson={l}
-              index={i}
               saved={memory.ledger[`lesson-${l.id}-gw${profile.currentGw}`]}
               onDismiss={() => setDismissed([...dismissed, l.id])}
             />
           ))}
-          {active.length === 0 && (
-            <div className="card p-6 text-sm text-muted">No lessons yet. Play a few gameweeks and TopGaffer starts learning.</div>
-          )}
-          {hidden.length > 0 && (
-            <div className="card p-4 2xl:col-span-2">
-              <p className="eyebrow">You said these aren&apos;t true</p>
-              <ul className="mt-3 space-y-2">
-                {hidden.map((l) => (
-                  <li key={l.id} className="flex items-center gap-3 text-sm text-muted">
-                    <span className="flex-1 line-through">{l.title}</span>
-                    <button
-                      onClick={() => setDismissed(dismissed.filter((d) => d !== l.id))}
-                      className="inline-flex items-center gap-1 text-xs text-volt hover:underline"
-                    >
-                      <Undo2 size={13} /> Restore
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {shown.length === 0 && <p className="text-sm text-muted">Nothing here yet.</p>}
+        </div>
+        {hidden.length > 0 && (
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-faint">
+            <span>Marked not true:</span>
+            {hidden.map((l) => (
+              <button key={l.id} onClick={() => setDismissed(dismissed.filter((d) => d !== l.id))} className="inline-flex items-center gap-1 hover:text-text">
+                <Undo2 size={12} /> {l.title}
+              </button>
+            ))}
+          </div>
+        )}
+      </section>
 
-          <section className="card p-5 2xl:col-span-2">
-            <div className="flex items-center justify-between">
-              <p className="eyebrow">Memory timeline · stored on Walrus</p>
-              {memory.pending > 0 && (
-                <span className="inline-flex items-center gap-1.5 text-xs text-info">
-                  <Loader2 size={13} className="animate-spin" /> {memory.pending} saving
-                </span>
-              )}
-            </div>
-            {memory.error && <p className="mt-3 text-sm text-bad">{memory.error}</p>}
-            <ol className="mt-4 space-y-2">
-              {timeline.map((m) => (
-                <li key={m.key} className="rounded-xl border border-line p-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="eyebrow text-[10px]">{label(m.key)}</span>
-                    <WalrusChip saved={m} />
-                  </div>
-                  {m.text && <p className="mt-1.5 text-sm text-muted">{stripTag(m.text)}</p>}
-                </li>
-              ))}
-              {timeline.length === 0 && <li className="text-sm text-muted">Your season is being written to Walrus…</li>}
-            </ol>
-          </section>
+      <div className="grid items-start gap-5 xl:grid-cols-12">
+        <section className="card xl:col-span-8">
+          <div className="flex items-center justify-between border-b border-line px-4 py-3">
+            <h2 className="text-sm font-semibold">Memory timeline</h2>
+            {memory.pending > 0 && (
+              <span className="inline-flex items-center gap-1.5 text-xs text-muted">
+                <Loader2 size={12} className="animate-spin" /> {memory.pending} saving to Walrus
+              </span>
+            )}
+          </div>
+          <ol className="divide-y divide-line">
+            {timeline.map((m) => (
+              <li key={m.key} className="grid gap-1 px-4 py-3 sm:grid-cols-[9rem_1fr_auto] sm:gap-4">
+                <span className="text-xs text-muted">{label(m.key)}</span>
+                <span className="text-sm text-text/85">{m.text ? stripTag(m.text) : "—"}</span>
+                <WalrusStatus saved={m} />
+              </li>
+            ))}
+            {timeline.length === 0 && <li className="px-4 py-6 text-sm text-muted">Your season is being written to Walrus…</li>}
+          </ol>
         </section>
 
-        <aside className="space-y-5 xl:col-span-4">
-          <section className="card relative overflow-hidden p-5">
-            <div className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-good/10 blur-3xl" />
-            <p className="eyebrow">Your memory on Walrus</p>
-            <div className="mt-3 flex items-end gap-6">
-              <div>
-                <p className="num font-display text-4xl font-bold text-good">{memory.saved}</p>
-                <p className="text-xs text-muted">stored on mainnet</p>
-              </div>
-              {memory.pending > 0 && (
-                <div>
-                  <p className="num font-display text-4xl font-bold text-info">{memory.pending}</p>
-                  <p className="text-xs text-muted">saving now</p>
-                </div>
-              )}
-            </div>
-            <ul className="mt-5 space-y-4 text-sm">
-              <li className="flex gap-3">
-                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-volt/10 text-volt">
-                  <Brain size={17} />
-                </span>
-                <div>
-                  <p className="font-semibold">Walrus remembers</p>
-                  <p className="text-muted">Every gameweek, lesson and locked plan is stored encrypted in Walrus Memory and recalled by meaning.</p>
-                </div>
-              </li>
-              <li className="flex gap-3">
-                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-good/10 text-good">
-                  <Fingerprint size={17} />
-                </span>
-                <div>
-                  <p className="font-semibold">Sui proves</p>
-                  <p className="text-muted">Each locked plan gets a fingerprint on Sui, so nobody can say you changed it after kickoff.</p>
-                </div>
-              </li>
-              <li className="flex gap-3">
-                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-info/10 text-info">
-                  <Network size={17} />
-                </span>
-                <div>
-                  <p className="font-semibold">Tatum connects</p>
-                  <p className="text-muted">TopGaffer reads and writes Sui through Tatum&apos;s gateway.</p>
-                </div>
-              </li>
-            </ul>
-          </section>
-
-          <section className="card p-5">
-            <p className="eyebrow">Locked plans</p>
-            <ul className="mt-3 space-y-2">
-              {locks.map((p) => (
-                <li key={p.gw} className="rounded-xl border border-line p-3 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold">GW{p.gw}</span>
-                    <span className="inline-flex items-center gap-1 text-xs text-good">
-                      <Check size={13} /> Locked
-                    </span>
-                  </div>
-                  <p className="mt-1 text-muted">
-                    Captain {name(p.captain)}
-                    {p.transfersIn.length > 0 && ` · in: ${p.transfersIn.map(name).join(", ")}`}
-                  </p>
-                  <p className="num mt-1 truncate text-[11px] text-faint">{p.fingerprint}</p>
-                  {p.sui && (
-                    <a href={p.sui.explorerUrl} target="_blank" rel="noreferrer" className="mt-1.5 inline-block text-xs font-medium text-volt hover:underline">
-                      Proof on Sui {p.sui.network} ↗
+        <section className="card xl:col-span-4">
+          <h2 className="border-b border-line px-4 py-3 text-sm font-semibold">Locked plans</h2>
+          <ul className="divide-y divide-line">
+            {locks.map((p) => (
+              <li key={p.gw} className="px-4 py-3 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">GW{p.gw}</span>
+                  {p.sui ? (
+                    <a href={p.sui.explorerUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-muted hover:text-text">
+                      <Check size={12} className="text-good" /> On Sui <ExternalLink size={11} />
                     </a>
+                  ) : (
+                    <span className="text-xs text-faint">This device only</span>
                   )}
-                </li>
-              ))}
-              {locks.length === 0 && <li className="text-sm text-muted">Lock a plan on the Deadline screen and it shows up here.</li>}
-            </ul>
-          </section>
-        </aside>
+                </div>
+                <p className="mt-0.5 text-muted">
+                  Captain {name(p.captain)}
+                  {p.transfersIn.length > 0 && ` · in: ${p.transfersIn.map(name).join(", ")}`}
+                </p>
+              </li>
+            ))}
+            {locks.length === 0 && <li className="px-4 py-4 text-sm text-muted">Lock a plan on the Deadline page and it appears here.</li>}
+          </ul>
+        </section>
       </div>
     </div>
+  );
+}
+
+/** The tech explanation, available on demand instead of taking up the page. */
+function TechNote() {
+  return (
+    <details className="group relative">
+      <summary className="flex cursor-pointer list-none items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-xs text-muted hover:text-text">
+        <span className="size-1.5 rounded-full bg-good" /> Secured on Walrus + Sui <Info size={12} />
+      </summary>
+      <div className="absolute right-0 z-20 mt-2 w-80 rounded-xl border border-line-strong bg-raised p-4 text-xs leading-relaxed text-muted shadow-2xl shadow-black/50">
+        <p>
+          <span className="font-medium text-text">Walrus Memory</span> stores every gameweek review, lesson, locked plan and coach conversation for
+          your team, encrypted, on mainnet. TopGaffer recalls them by meaning before it advises you.
+        </p>
+        <p className="mt-2">
+          <span className="font-medium text-text">Sui</span> holds a frozen fingerprint of each locked plan, written through Tatum&apos;s gateway, so it
+          provably existed before kickoff.
+        </p>
+      </div>
+    </details>
   );
 }
 
 function AskMemory({ teamId }: { teamId: number }) {
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
-  const [results, setResults] = useState<{ text: string; blobId: string; distance: number }[] | null>(null);
+  const [results, setResults] = useState<{ text: string; blobId: string }[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function ask(query: string) {
@@ -193,90 +202,87 @@ function AskMemory({ teamId }: { teamId: number }) {
   }
 
   return (
-    <section className="card p-5 lg:col-span-2 xl:col-span-12">
+    <section>
       <form
         onSubmit={(e: FormEvent) => {
           e.preventDefault();
           ask(q);
         }}
-        className="flex items-center gap-2 rounded-2xl border border-line-strong bg-ink p-1.5 focus-within:border-volt/60"
+        className="flex items-center gap-2 rounded-lg border border-line bg-surface p-1 focus-within:border-line-strong"
       >
-        <Sparkles size={18} className="ml-2 shrink-0 text-volt" />
+        <Search size={16} className="ml-2.5 shrink-0 text-faint" />
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Ask your memory, e.g. “do my hits pay off?”"
-          className="min-w-0 flex-1 bg-transparent px-2 py-2.5 outline-none placeholder:text-faint"
+          placeholder="Search your memory, e.g. “do my hits pay off?”"
+          className="min-w-0 flex-1 bg-transparent px-1 py-2 text-sm outline-none placeholder:text-faint"
         />
         <button
           type="submit"
           disabled={busy || !q.trim()}
-          className="inline-flex items-center gap-2 rounded-xl bg-volt px-4 py-2.5 text-sm font-semibold text-ink disabled:opacity-40"
+          className="inline-flex items-center gap-1.5 rounded-md bg-volt px-3 py-1.5 text-sm font-semibold text-ink disabled:opacity-40"
         >
-          {busy ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />} Recall
+          {busy && <Loader2 size={14} className="animate-spin" />} Recall
         </button>
       </form>
-      <div className="mt-3 flex flex-wrap gap-2">
+      <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-faint">
+        Try:
         {SUGGESTIONS.map((s) => (
-          <button key={s} onClick={() => ask(s)} className="rounded-full border border-line px-3 py-1 text-xs text-muted hover:border-line-strong hover:text-text">
+          <button key={s} onClick={() => ask(s)} className="text-muted underline-offset-2 hover:text-text hover:underline">
             {s}
           </button>
         ))}
-      </div>
-      {error && <p className="mt-3 text-sm text-bad">{error}</p>}
+      </p>
+      {error && <p className="mt-2 text-sm text-bad">{error}</p>}
       {results && (
-        <ul className="mt-4 grid gap-2 lg:grid-cols-2">
+        <ul className="card mt-3 divide-y divide-line">
           {results.map((r, i) => (
-            <li key={r.blobId} className="rounded-xl border border-line bg-white/[0.02] p-3">
-              <div className="flex items-center justify-between gap-2">
-                <span className="eyebrow text-[10px]">{tagOf(r.text)}</span>
-                {i === 0 && <span className="rounded-full bg-good/10 px-2 py-0.5 text-[10px] font-semibold text-good">Closest match</span>}
-              </div>
+            <li key={r.blobId} className="px-4 py-3">
+              <p className="flex items-center gap-2 text-xs text-muted">
+                {tagOf(r.text)}
+                {i === 0 && <span className="rounded bg-good/10 px-1.5 py-0.5 text-[10px] font-medium text-good">Closest match</span>}
+              </p>
               <p className="mt-1 text-sm">{stripTag(r.text)}</p>
-              <p className="num mt-1.5 truncate text-[10px] text-faint">blob {r.blobId}</p>
             </li>
           ))}
-          {results.length === 0 && <li className="text-sm text-muted">Nothing in memory matches that yet.</li>}
+          {results.length === 0 && <li className="px-4 py-3 text-sm text-muted">Nothing in memory matches that yet.</li>}
         </ul>
       )}
     </section>
   );
 }
 
-function WalrusChip({ saved }: { saved?: SavedMemory }) {
+function WalrusStatus({ saved }: { saved?: SavedMemory }) {
   if (!saved) return null;
   if (saved.status === "done")
     return (
-      <span className="inline-flex max-w-[60%] items-center gap-1 rounded-full bg-good/10 px-2 py-0.5 text-[10px] font-medium text-good" title={saved.blobId ?? ""}>
-        <Check size={11} /> On Walrus <span className="num truncate opacity-70">{saved.blobId?.slice(0, 8)}</span>
+      <span className="inline-flex items-center gap-1 text-xs text-faint" title={saved.blobId ?? ""}>
+        <Check size={12} className="text-good" /> Walrus
       </span>
     );
-  if (saved.status === "failed" || saved.status === "not_found")
-    return <span className="rounded-full bg-bad/10 px-2 py-0.5 text-[10px] font-medium text-bad">Retrying next visit</span>;
+  if (saved.status === "failed" || saved.status === "not_found") return <span className="text-xs text-bad">Retrying</span>;
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-info/10 px-2 py-0.5 text-[10px] font-medium text-info">
-      <Loader2 size={11} className="animate-spin" /> Saving to Walrus
+    <span className="inline-flex items-center gap-1 text-xs text-faint">
+      <Loader2 size={12} className="animate-spin" /> Saving
     </span>
   );
 }
 
-function LessonCard({ lesson, index, saved, onDismiss }: { lesson: Lesson; index: number; saved?: SavedMemory; onDismiss: () => void }) {
+function LessonCard({ lesson, saved, onDismiss }: { lesson: Lesson; saved?: SavedMemory; onDismiss: () => void }) {
   return (
-    <article className="card group relative overflow-hidden p-5">
-      <span className="num absolute top-4 right-5 font-display text-4xl font-bold text-white/[0.04]">{String(index + 1).padStart(2, "0")}</span>
-      <div className="flex flex-wrap items-center gap-2 pr-12">
-        <ToneChip tone={lesson.tone} />
-        <span className="text-[11px] tracking-wider text-faint uppercase">{lesson.topic}</span>
-        <WalrusChip saved={saved} />
+    <article className="card p-4 transition hover:border-line-strong">
+      <div className="flex items-center justify-between gap-2">
+        <ToneChip tone={lesson.tone} detail={lesson.topic[0].toUpperCase() + lesson.topic.slice(1)} />
+        <WalrusStatus saved={saved} />
       </div>
-      <h2 className="mt-3 pr-10 font-display text-xl leading-snug font-semibold">{lesson.title}</h2>
-      <p className="mt-1.5 text-sm text-muted">{lesson.detail}</p>
-      {lesson.evidence && (
-        <p className="mt-3 rounded-xl border-l-2 border-volt/50 bg-white/[0.03] px-3 py-2 text-xs text-text/80">{lesson.evidence}</p>
-      )}
-      <button onClick={onDismiss} className="mt-4 inline-flex items-center gap-1.5 text-xs text-faint transition hover:text-text">
-        <ThumbsDown size={13} /> Not true for me
-      </button>
+      <h3 className="mt-2 text-[15px] leading-snug font-semibold">{lesson.title}</h3>
+      <p className="mt-1 text-sm text-muted">{lesson.detail}</p>
+      <div className="mt-3 flex items-center justify-between gap-3">
+        <span className="text-xs text-faint">{lesson.evidence}</span>
+        <button onClick={onDismiss} className="shrink-0 text-xs text-faint hover:text-text">
+          Not true for me
+        </button>
+      </div>
     </article>
   );
 }
@@ -295,7 +301,8 @@ function label(key: string) {
   const gw = key.match(/gw(\d+)/)?.[1];
   if (key.endsWith("-review")) return `GW${gw} review`;
   if (key.includes("-plan-")) return `GW${gw} plan locked`;
-  if (key.startsWith("lesson-")) return `Lesson after GW${gw} · ${key.split("-")[1]}`;
+  if (key.startsWith("lesson-")) return `Lesson · ${key.split("-")[1]}`;
+  if (key.startsWith("coach-")) return "Coach chat";
   return key;
 }
 

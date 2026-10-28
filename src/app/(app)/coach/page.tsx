@@ -131,16 +131,16 @@ export default function CoachPage() {
           <div className="flex-1 space-y-5 p-5">
             {messages.length === 0 ? (
               <div className="flex flex-col items-center py-10 text-center">
-                <div className="grid size-16 place-items-center rounded-3xl bg-gradient-to-br from-volt to-good text-ink shadow-[0_0_40px_-8px_var(--color-volt)]">
-                  <Sparkles size={28} />
+                <div className="grid size-12 place-items-center rounded-xl bg-white/[0.06] text-volt ring-1 ring-line">
+                  <Sparkles size={22} />
                 </div>
-                <p className="mt-5 font-display text-2xl font-semibold">What do you want to know, {profile.managerName.split(" ")[0]}?</p>
+                <p className="mt-4 text-lg font-semibold">What do you want to know, {profile.managerName.split(" ")[0]}?</p>
                 <p className="mt-2 max-w-md text-sm text-muted">
                   I know your whole season, your squad for GW{profile.nextGw?.id ?? profile.currentGw + 1}, the experts you follow, and every memory saved on Walrus.
                 </p>
                 <div className="mt-6 flex max-w-xl flex-wrap justify-center gap-2">
                   {SUGGESTIONS.map((s) => (
-                    <button key={s} onClick={() => ask(s)} className="rounded-full border border-line-strong bg-white/[0.02] px-3.5 py-2 text-sm text-text/90 transition hover:border-volt/50 hover:text-volt">
+                    <button key={s} onClick={() => ask(s)} className="rounded-lg border border-line px-3 py-1.5 text-sm text-muted transition hover:border-line-strong hover:text-text">
                       {s}
                     </button>
                   ))}
@@ -154,7 +154,7 @@ export default function CoachPage() {
 
           <form onSubmit={onSubmit} className="sticky bottom-24 border-t border-line bg-surface/90 p-3 backdrop-blur md:bottom-0">
             {error && <p className="mb-2 px-1 text-sm text-bad">{error}</p>}
-            <div className="flex items-end gap-2 rounded-2xl border border-line-strong bg-ink p-1.5 focus-within:border-volt/60">
+            <div className="flex items-end gap-2 rounded-xl border border-line-strong bg-ink p-1.5 focus-within:border-volt/60">
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -194,7 +194,7 @@ export default function CoachPage() {
             <ul className="mt-3 space-y-1.5">
               {SUGGESTIONS.map((s) => (
                 <li key={s}>
-                  <button onClick={() => ask(s)} disabled={busy} className="text-left text-sm text-muted hover:text-volt disabled:opacity-50">
+                  <button onClick={() => ask(s)} disabled={busy} className="text-left text-sm text-muted hover:text-text disabled:opacity-50">
                     {s}
                   </button>
                 </li>
@@ -221,13 +221,13 @@ function Bubble({ m }: { m: Message }) {
   if (m.role === "user") {
     return (
       <div className="flex justify-end">
-        <p className="max-w-[85%] animate-rise rounded-2xl rounded-br-md bg-volt/15 px-4 py-2.5 text-sm whitespace-pre-wrap ring-1 ring-volt/25">{m.text}</p>
+        <p className="max-w-[85%] animate-rise rounded-xl rounded-br-md bg-volt/15 px-4 py-2.5 text-sm whitespace-pre-wrap ring-1 ring-volt/25">{m.text}</p>
       </div>
     );
   }
   return (
     <div className="flex animate-rise gap-3">
-      <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-volt to-good text-ink">
+      <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-white/[0.06] text-volt ring-1 ring-line">
         <Sparkles size={16} />
       </div>
       <div className="min-w-0 flex-1">
@@ -241,7 +241,7 @@ function Bubble({ m }: { m: Message }) {
                 : "Reading your season…"}
           </p>
         ) : (
-          <div className="rounded-2xl rounded-tl-md bg-white/[0.03] px-4 py-3 text-sm leading-relaxed ring-1 ring-line">
+          <div className="rounded-xl rounded-tl-md bg-white/[0.03] px-4 py-3 text-sm leading-relaxed ring-1 ring-line">
             <RichText text={m.text} />
             {m.status === "fallback" && m.memories && (
               <ul className="mt-2 space-y-1.5">
@@ -285,7 +285,7 @@ function RichText({ text }: { text: string }) {
   const flush = () => {
     if (bullets.length) {
       blocks.push(
-        <ul key={blocks.length} className="my-2 list-disc space-y-1 pl-5 marker:text-volt">
+        <ul key={blocks.length} className="my-2 list-disc space-y-1 pl-5 marker:text-faint">
           {bullets.map((b, i) => (
             <li key={i}>{bold(b)}</li>
           ))}
@@ -309,7 +309,7 @@ function RichText({ text }: { text: string }) {
 function bold(s: string) {
   return s.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
     part.startsWith("**") && part.endsWith("**") ? (
-      <strong key={i} className="font-semibold text-volt">
+      <strong key={i} className="font-semibold text-text">
         {part.slice(2, -2)}
       </strong>
     ) : (

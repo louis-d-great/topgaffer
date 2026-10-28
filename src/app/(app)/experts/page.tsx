@@ -85,10 +85,10 @@ export default function ExpertsPage() {
 function EmptyState({ onAdd }: { onAdd: () => void }) {
   return (
     <div className="card flex flex-col items-center px-6 py-14 text-center">
-      <div className="grid size-14 place-items-center rounded-2xl bg-volt/10 text-volt">
+      <div className="grid size-12 place-items-center rounded-xl bg-white/[0.06] text-muted">
         <Trophy size={26} />
       </div>
-      <p className="mt-5 font-display text-2xl font-semibold">Track experts by what they actually do</p>
+      <p className="mt-4 text-lg font-semibold">Track experts by what they actually do</p>
       <p className="mt-2 max-w-lg text-sm text-muted">
         Add an expert&apos;s FPL team ID. TopGaffer reads their real captains, transfers and hits from GW1, scores them, and keeps
         their record up to date every gameweek. No typing in picks.
@@ -140,7 +140,7 @@ function Leaderboard({
             <tr className="border-t border-line bg-volt/[0.04]">
               <td className="py-3 pl-5 text-faint">–</td>
               <td className="py-3">
-                <p className="font-semibold text-volt">You</p>
+                <p className="font-semibold">You</p>
                 <p className="text-xs text-muted">{you.teamName}</p>
               </td>
               <td className="num py-3 text-right">{you.totalPoints}</td>
@@ -159,7 +159,7 @@ function Leaderboard({
                   onClick={() => onSelect(t.expert.teamId)}
                   className={`group cursor-pointer border-t border-line transition ${active ? "bg-white/[0.04]" : "hover:bg-white/[0.02]"}`}
                 >
-                  <td className={`num py-3 pl-5 font-display font-bold ${i === 0 ? "text-volt" : "text-faint"}`}>{i + 1}</td>
+                  <td className={`num py-3 pl-5 font-medium ${i === 0 ? "text-text" : "text-faint"}`}>{i + 1}</td>
                   <td className="py-3">
                     <ExpertName expert={t.expert} profile={t.profile} />
                   </td>
@@ -212,7 +212,7 @@ function ExpertName({ expert, profile }: { expert: Expert; profile: ExpertProfil
         <Link
           href={`/experts/${expert.teamId}`}
           onClick={(e) => e.stopPropagation()}
-          className="truncate font-semibold hover:text-volt hover:underline"
+          className="truncate font-semibold hover:underline"
         >
           {expert.name}
         </Link>
@@ -242,17 +242,17 @@ function HeadToHeadPanel({ tracked, you }: { tracked: TrackedExpert; you: Manage
           Full dashboard <ArrowUpRight size={13} />
         </Link>
       </div>
-      <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl bg-black/25 p-3 text-center">
+      <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl bg-black/25 p-3 text-center">
         <div>
-          <p className="num font-display text-2xl font-bold text-warn">{h2h.theyWon}</p>
+          <p className="num text-xl font-semibold text-warn">{h2h.theyWon}</p>
           <p className="text-[11px] text-muted">their weeks</p>
         </div>
         <div>
-          <p className="num font-display text-2xl font-bold">{h2h.weeks - h2h.theyWon - h2h.youWon}</p>
+          <p className="num text-xl font-semibold">{h2h.weeks - h2h.theyWon - h2h.youWon}</p>
           <p className="text-[11px] text-muted">level</p>
         </div>
         <div>
-          <p className="num font-display text-2xl font-bold text-good">{h2h.youWon}</p>
+          <p className="num text-xl font-semibold text-good">{h2h.youWon}</p>
           <p className="text-[11px] text-muted">your weeks</p>
         </div>
       </div>
@@ -335,7 +335,7 @@ function AddExpert({ onClose, onSave }: { onClose: () => void; onSave: (e: Exper
     <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} className="card w-full max-w-md animate-rise rounded-b-none p-5 sm:rounded-b-[1.25rem]">
         <div className="mb-4 flex items-center justify-between">
-          <p className="font-display text-xl font-semibold">Add an expert</p>
+          <p className="text-base font-semibold">Add an expert</p>
           <button onClick={onClose} className="rounded-full p-2 text-muted hover:bg-white/5" aria-label="Close">
             <X size={18} />
           </button>
@@ -380,7 +380,7 @@ function AddExpert({ onClose, onSave }: { onClose: () => void; onSave: (e: Exper
                   type="button"
                   key={p}
                   onClick={() => setPlatform(p)}
-                  className={`rounded-xl border py-2 text-sm font-medium ${platform === p ? "border-volt bg-volt/10 text-volt" : "border-line-strong text-muted"}`}
+                  className={`rounded-xl border py-2 text-sm font-medium ${platform === p ? "border-line-strong bg-white/[0.08] text-text" : "border-line-strong text-muted"}`}
                 >
                   {p === "x" ? "X" : p === "youtube" ? "YouTube" : "Other"}
                 </button>
