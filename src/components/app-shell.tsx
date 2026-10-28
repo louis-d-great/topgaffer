@@ -40,14 +40,14 @@ export function useManager() {
 export function Logo({ compact = false }: { compact?: boolean }) {
   return (
     <span className="inline-flex items-center gap-2">
-      <span className="relative grid size-8 place-items-center rounded-xl bg-volt text-ink shadow-[0_0_24px_-4px_var(--color-volt)]">
+      <span className="relative grid size-9 place-items-center rounded-xl bg-volt text-ink shadow-[0_0_24px_-6px_var(--color-volt)]">
         <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
           <path d="M5 8h14M12 8v11" />
           <circle cx="12" cy="8" r="0.6" fill="currentColor" />
         </svg>
       </span>
       {!compact && (
-        <span className="font-brand text-lg font-bold tracking-tight">
+        <span className="font-brand text-xl font-bold tracking-tight">
           Top<span className="text-volt">Gaffer</span>
         </span>
       )}
@@ -71,31 +71,33 @@ export function AppShell({ children }: { children: ReactNode }) {
     <Ctx.Provider value={{ teamId, profile: data, loading, error, memory }}>
       <div className="flex min-h-dvh w-full">
         {/* Desktop sidebar */}
-        <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-line bg-pitch px-3 py-5 md:flex">
-          <Link href="/home" className="px-2">
-            <Logo />
-          </Link>
-          <p className="section-label mt-8 px-3">Menu</p>
-          <Suspense fallback={<SideNav active={null} />}>
-            <CurrentSideNav />
-          </Suspense>
-          {data && <GameweekCard profile={data} />}
-          <div className="mt-2 rounded-lg border border-line p-2.5">
-            <div className="flex items-center gap-3">
+        <div className="sticky top-0 hidden h-dvh shrink-0 p-3 pr-0 md:block">
+          <aside className="flex h-full w-[272px] flex-col rounded-3xl border border-line bg-surface p-3 shadow-[0_1px_0_0_rgb(255_255_255/0.04)_inset,0_10px_30px_-12px_rgb(0_0_0/0.8)]">
+            <Link href="/home" className="flex items-center rounded-2xl px-2 py-2">
+              <Logo />
+            </Link>
+            <p className="section-label mt-6 mb-2 px-3">Menu</p>
+            <Suspense fallback={<SideNav active={null} />}>
+              <CurrentSideNav />
+            </Suspense>
+            {data && <GameweekCard profile={data} />}
+            <div className="mt-3 flex items-center gap-3 rounded-2xl bg-white/[0.03] p-2.5 ring-1 ring-line">
               <Avatar name={data?.managerName} />
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold">{data?.teamName ?? "Loading…"}</p>
                 <p className="truncate text-xs text-muted">{data?.managerName ?? (teamId ? `Team ${teamId}` : "")}</p>
               </div>
+              <button
+                onClick={() => setTeamId(null)}
+                className="grid size-8 shrink-0 place-items-center rounded-lg text-faint transition hover:bg-white/[0.06] hover:text-text"
+                aria-label="Switch team"
+                title="Switch team"
+              >
+                <LogOut size={16} />
+              </button>
             </div>
-            <button
-              onClick={() => setTeamId(null)}
-              className="mt-3 inline-flex items-center gap-1.5 text-xs text-faint hover:text-text"
-            >
-              <LogOut size={13} /> Switch team
-            </button>
-          </div>
-        </aside>
+          </aside>
+        </div>
 
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Top bar */}
@@ -205,11 +207,11 @@ function GameweekCard({ profile }: { profile: ManagerProfile }) {
     ]);
   }
   return (
-    <div className="mt-auto rounded-lg border border-line p-2.5">
+    <div className="mt-auto rounded-2xl bg-white/[0.03] p-3 ring-1 ring-line">
       <p className="section-label">This gameweek</p>
       <dl className="mt-2 space-y-1.5">
         {rows.map(([k, v]) => (
-          <div key={k} className="flex items-baseline justify-between gap-2 text-xs">
+          <div key={k} className="flex items-baseline justify-between gap-2 text-[13px]">
             <dt className="text-muted">{k}</dt>
             <dd className="num font-medium text-text">{v}</dd>
           </div>
@@ -244,18 +246,21 @@ function CurrentMobileNav() {
 
 function SideNav({ active }: { active: string | null }) {
   return (
-    <nav className="mt-3 flex flex-col gap-1">
+    <nav className="flex flex-col gap-1">
       {NAV.map(({ href, label, icon: Icon }) => {
         const on = href === active;
         return (
           <Link
             key={href}
             href={href}
-            className={`relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition ${
-              on ? "bg-white/[0.06] text-text" : "text-muted hover:bg-white/[0.04] hover:text-text"
+            aria-current={on ? "page" : undefined}
+            className={`flex h-11 items-center gap-3 rounded-xl px-3 text-[15px] font-medium transition ${
+              on
+                ? "bg-linear-to-b from-accent-500 to-accent-600 text-neutral-950 shadow-[0_0_0_1px_var(--color-accent-500),inset_0_1px_0_0_rgb(255_255_255/0.35)]"
+                : "text-muted hover:bg-white/[0.05] hover:text-text"
             }`}
           >
-            <Icon size={16} strokeWidth={2} className={on ? "text-volt" : ""} />
+            <Icon size={20} strokeWidth={on ? 2.2 : 1.8} />
             {label}
           </Link>
         );
