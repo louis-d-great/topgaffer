@@ -9,7 +9,7 @@ export function TeamBadge({ team, size = 28 }: { team: string; size?: number }) 
   const [bg, fg] = KITS[team] ?? ["#2a3238", "#ffffff"];
   return (
     <span
-      className="inline-flex shrink-0 items-center justify-center rounded-lg font-mono font-semibold ring-1 ring-white/10"
+      className="inline-flex shrink-0 items-center justify-center rounded-lg font-mono font-semibold ring-1 ring-fg/10"
       style={{ background: bg, color: fg, width: size, height: size, fontSize: size * 0.32 }}
       aria-hidden
     >
@@ -58,9 +58,9 @@ export function Stat({
 }) {
   const color = tone === "warning" ? "text-warn" : tone === "strength" ? "text-good" : "text-text";
   return (
-    <div className="card p-4">
+    <div className="card p-5">
       <p className="eyebrow">{label}</p>
-      <p className={`mt-1.5 text-2xl font-semibold tracking-tight ${color}`}>
+      <p className={`mt-1 text-3xl font-semibold tracking-tight ${color}`}>
         {value}
         {suffix && <span className="ml-1 text-sm font-normal text-muted">{suffix}</span>}
       </p>
@@ -88,7 +88,7 @@ export function ToneChip({ tone, detail }: { tone: LessonTone; detail?: string }
 }
 
 export function Skeleton({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-xl bg-white/[0.04] ${className}`} />;
+  return <div className={`animate-pulse rounded-xl bg-fg/[0.04] ${className}`} />;
 }
 
 export function FdrPill({ difficulty }: { difficulty: number }) {
@@ -102,10 +102,10 @@ export function FdrPill({ difficulty }: { difficulty: number }) {
 
 export function PageHeader({ eyebrow, title, children }: { eyebrow: string; title: ReactNode; children?: ReactNode }) {
   return (
-    <header className="mb-5 flex flex-wrap items-end justify-between gap-4">
+    <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-        <p className="mt-0.5 text-sm text-muted">{eyebrow}</p>
+        <p className="text-sm text-muted">{eyebrow}</p>
+        <h1 className="mt-0.5 text-3xl font-semibold tracking-tight">{title}</h1>
       </div>
       {children}
     </header>
@@ -118,7 +118,7 @@ export function ErrorCard({ message, onRetry }: { message: string; onRetry?: () 
       <p className="text-base font-semibold">Couldn&apos;t load your data</p>
       <p className="text-sm text-muted">{message}</p>
       {onRetry && (
-        <button onClick={onRetry} className="rounded-lg bg-white/10 px-4 py-2 text-sm font-semibold hover:bg-white/15">
+        <button onClick={onRetry} className="rounded-lg bg-fg/10 px-4 py-2 text-sm font-semibold hover:bg-fg/15">
           Try again
         </button>
       )}

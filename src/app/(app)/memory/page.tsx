@@ -31,7 +31,9 @@ export default function MemoryPage() {
 
   const active = profile.lessons.filter((l) => !dismissed.includes(l.id));
   const hidden = profile.lessons.filter((l) => dismissed.includes(l.id));
-  const shown = active.filter((l) => filter === "all" || l.tone === filter);
+  // Warnings first: they are what should change the next decision.
+  const toneOrder = { warning: 0, info: 1, strength: 2 };
+  const shown = active.filter((l) => filter === "all" || l.tone === filter).sort((a, b) => toneOrder[a.tone] - toneOrder[b.tone]);
   const locks = Object.values(plans).sort((a, b) => b.gw - a.gw);
   const name = (id: number) => profile.players[id]?.name ?? "Unknown";
   const timeline = Object.entries(memory.ledger)
@@ -88,9 +90,10 @@ export default function MemoryPage() {
           {memory.error && <p className="text-xs text-bad">{memory.error}</p>}
         </div>
         <div className="mt-3 grid gap-3 lg:grid-cols-2">
-          {shown.map((l) => (
+          {shown.map((l, i) => (
             <LessonCard
               key={l.id}
+              featured={i === 0 && shown.length > 1}
               lesson={l}
               saved={memory.ledger[`lesson-${l.id}-gw${profile.currentGw}`]}
               onDismiss={() => setDismissed([...dismissed, l.id])}
@@ -268,14 +271,14 @@ function WalrusStatus({ saved }: { saved?: SavedMemory }) {
   );
 }
 
-function LessonCard({ lesson, saved, onDismiss }: { lesson: Lesson; saved?: SavedMemory; onDismiss: () => void }) {
+function LessonCard({ lesson, saved, onDismiss, featured = false }: { lesson: Lesson; saved?: SavedMemory; onDismiss: () => void; featured?: boolean }) {
   return (
-    <article className="card p-4 transition hover:border-line-strong">
+    <article className={`card transition hover:border-line-strong ${featured ? "p-6 lg:col-span-2" : "p-5"}`}>
       <div className="flex items-center justify-between gap-2">
         <ToneChip tone={lesson.tone} detail={lesson.topic[0].toUpperCase() + lesson.topic.slice(1)} />
         <WalrusStatus saved={saved} />
       </div>
-      <h3 className="mt-2 text-[15px] leading-snug font-semibold">{lesson.title}</h3>
+      <h3 className={`mt-2 leading-snug font-semibold ${featured ? "text-xl" : "text-[15px]"}`}>{lesson.title}</h3>
       <p className="mt-1 text-sm text-muted">{lesson.detail}</p>
       <div className="mt-3 flex items-center justify-between gap-3">
         <span className="text-xs text-faint">{lesson.evidence}</span>

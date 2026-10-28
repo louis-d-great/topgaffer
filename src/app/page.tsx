@@ -56,7 +56,7 @@ export default function Welcome() {
         <h1 className="mt-10 font-display text-5xl leading-[0.95] font-bold tracking-tight sm:text-7xl">
           Stop making the
           <br />
-          <span className="text-volt">same FPL mistakes.</span>
+          <span className="text-volt-text">same FPL mistakes.</span>
         </h1>
         <p className="mt-6 max-w-lg text-lg text-muted">
           TopGaffer remembers every captain, transfer and hit you&apos;ve made, and every expert you&apos;ve listened to. Before
@@ -81,14 +81,14 @@ export default function Welcome() {
             <button
               type="submit"
               disabled={busy || !input}
-              className="inline-flex items-center gap-2 rounded-xl bg-volt px-5 py-3 font-semibold text-ink transition hover:bg-volt-deep disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-xl bg-volt px-5 py-3 font-semibold text-neutral-950 transition hover:bg-volt-deep disabled:opacity-40"
             >
               {busy ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={18} />}
               {busy ? "Reading" : "Start"}
             </button>
           </div>
           {busy ? (
-            <p className="mt-3 text-sm text-volt" aria-live="polite">
+            <p className="mt-3 text-sm text-volt-text" aria-live="polite">
               {STEPS[step]}…
             </p>
           ) : error ? (
@@ -108,7 +108,7 @@ export default function Welcome() {
             { icon: Lock, text: "Locks your plan before kickoff" },
           ].map(({ icon: Icon, text }) => (
             <li key={text} className="flex items-start gap-2 text-muted">
-              <Icon size={16} className="mt-0.5 shrink-0 text-volt" />
+              <Icon size={16} className="mt-0.5 shrink-0 text-volt-text" />
               {text}
             </li>
           ))}

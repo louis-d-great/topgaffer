@@ -61,7 +61,7 @@ export function PlayerPicker({
             <p className="font-display text-lg font-semibold">{title}</p>
             {maxPrice !== undefined && <p className="text-xs text-muted">Up to £{maxPrice.toFixed(1)}m</p>}
           </div>
-          <button onClick={onClose} className="rounded-full p-2 text-muted hover:bg-white/5 hover:text-text" aria-label="Close">
+          <button onClick={onClose} className="rounded-full p-2 text-muted hover:bg-fg/5 hover:text-text" aria-label="Close">
             <X size={18} />
           </button>
         </div>
@@ -85,7 +85,7 @@ export function PlayerPicker({
                 <button
                   disabled={tooExpensive}
                   onClick={() => onPick(p)}
-                  className="flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-left transition hover:bg-white/5 disabled:opacity-35"
+                  className="flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-left transition hover:bg-fg/5 disabled:opacity-35"
                 >
                   <TeamBadge team={p.team} />
                   <div className="min-w-0 flex-1">

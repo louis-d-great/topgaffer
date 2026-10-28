@@ -1,4 +1,4 @@
-"use client";
+                                                                                                                          "use client";
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { SegmentedControl, SegmentedControlItem } from "@/components/base/segmented-control/segmented-control";
@@ -92,7 +92,7 @@ export function ChartCard({
 }) {
   const [view, setView] = useState<"chart" | "table">("chart");
   return (
-    <section className={`card flex flex-col p-5 ${className}`}>
+    <section className={`card flex flex-col p-6 ${className}`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="eyebrow">{title}</p>
@@ -413,7 +413,7 @@ export function BarList({ rows, max, color, unit }: { rows: { label: ReactNode; 
       {rows.map((r) => (
         <li key={r.key} className="grid grid-cols-[8rem_1fr_auto] items-center gap-3 text-sm">
           <span className="truncate">{r.label}</span>
-          <span className="h-2 overflow-hidden rounded-full bg-white/[0.05]">
+          <span className="h-2 overflow-hidden rounded-full bg-fg/[0.05]">
             <span className="block h-full rounded-full" style={{ width: `${(r.value / Math.max(1, max)) * 100}%`, background: color }} />
           </span>
           <span className="num w-14 text-right text-xs text-muted">
@@ -453,7 +453,7 @@ export function CompareMeter({
             <span className="size-2 rounded-sm" style={{ background: x.color }} />
             {x.label}
           </span>
-          <span className="h-1.5 overflow-hidden rounded-full bg-white/[0.05]">
+          <span className="h-1.5 overflow-hidden rounded-full bg-fg/[0.05]">
             <span className="block h-full rounded-full" style={{ width: `${Math.min(100, (x.value / Math.max(max, 1e-9)) * 100)}%`, background: x.color }} />
           </span>
           <span className="num text-right">{format(x.value)}</span>

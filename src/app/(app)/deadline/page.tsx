@@ -143,11 +143,11 @@ function DeadlineCheck({ data, profile, teamId }: { data: DeadlineData; profile:
       <PageHeader eyebrow={`Gameweek ${gw} · ${fmtDeadline(data.gw.deadline)}`} title="Deadline check">
         <div className="flex items-center gap-2 rounded-xl border border-line bg-surface p-1.5 text-sm">
           <span className="pl-2 text-muted">Free transfers</span>
-          <button onClick={() => setFt(Math.max(0, ft - 1))} className="rounded-lg p-1.5 hover:bg-white/5" aria-label="Fewer">
+          <button onClick={() => setFt(Math.max(0, ft - 1))} className="rounded-lg p-1.5 hover:bg-fg/5" aria-label="Fewer">
             <Minus size={14} />
           </button>
           <span className="num w-4 text-center font-semibold">{ft}</span>
-          <button onClick={() => setFt(Math.min(5, ft + 1))} className="rounded-lg p-1.5 hover:bg-white/5" aria-label="More">
+          <button onClick={() => setFt(Math.min(5, ft + 1))} className="rounded-lg p-1.5 hover:bg-fg/5" aria-label="More">
             <Plus size={14} />
           </button>
         </div>
@@ -315,18 +315,18 @@ function PlayerChip({
           <Jersey team={p.team} code={p.teamCode} pos={p.pos} size={54} />
         </span>
         {captain && (
-          <span className="absolute -top-0.5 -right-1 grid size-5 place-items-center rounded-full bg-volt text-[10px] font-black text-ink shadow-[0_0_12px_var(--color-volt)]">
+          <span className="absolute -top-0.5 -right-1 grid size-5 place-items-center rounded-full bg-volt text-[10px] font-black text-neutral-950 shadow-[0_0_12px_var(--color-volt)]">
             C
           </span>
         )}
         {!captain && p.isVice && (
-          <span className="absolute -top-0.5 -right-1 grid size-5 place-items-center rounded-full bg-white/90 text-[10px] font-black text-ink">V</span>
+          <span className="absolute -top-0.5 -right-1 grid size-5 place-items-center rounded-full bg-white/90 text-[10px] font-black text-neutral-950">V</span>
         )}
         {p.incoming && (
-          <span className="absolute -top-0.5 -left-1 rounded-full bg-good px-1.5 text-[9px] font-black text-ink">IN</span>
+          <span className="absolute -top-0.5 -left-1 rounded-full bg-good px-1.5 text-[9px] font-black text-neutral-950">IN</span>
         )}
         {!p.incoming && p.status !== "a" && (
-          <span className="absolute -top-0.5 -left-1 grid size-5 place-items-center rounded-full bg-warn text-ink">
+          <span className="absolute -top-0.5 -left-1 grid size-5 place-items-center rounded-full bg-warn text-neutral-950">
             <ShieldAlert size={12} />
           </span>
         )}
@@ -390,16 +390,16 @@ function SelectedBar({
         </p>
       </div>
       {!player.benched && !isCaptain && (
-        <button onClick={onCaptain} className="inline-flex items-center gap-1.5 rounded-xl bg-volt px-3 py-2 text-sm font-semibold text-ink">
+        <button onClick={onCaptain} className="inline-flex items-center gap-1.5 rounded-xl bg-volt px-3 py-2 text-sm font-semibold text-neutral-950">
           <Crown size={15} /> Captain
         </button>
       )}
       {swapped ? (
-        <button onClick={onUndo} className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-3 py-2 text-sm font-semibold">
+        <button onClick={onUndo} className="inline-flex items-center gap-1.5 rounded-xl bg-fg/10 px-3 py-2 text-sm font-semibold">
           <RotateCcw size={15} /> Undo
         </button>
       ) : (
-        <button onClick={onSell} className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-3 py-2 text-sm font-semibold hover:bg-white/15">
+        <button onClick={onSell} className="inline-flex items-center gap-1.5 rounded-xl bg-fg/10 px-3 py-2 text-sm font-semibold hover:bg-fg/15">
           <ArrowDownUp size={15} /> Sell
         </button>
       )}
@@ -470,7 +470,7 @@ function VerdictPanel({
             <p className={`mt-1 text-3xl font-semibold tracking-tight ${level.cls}`}>{level.label}</p>
             <p className="mt-1 text-sm text-muted">{sub}</p>
           </div>
-          <span className={`grid size-12 shrink-0 place-items-center rounded-xl bg-black/30 ring-1 ring-white/10 ${level.cls}`}>
+          <span className={`grid size-12 shrink-0 place-items-center rounded-xl bg-sunken ring-1 ring-fg/10 ${level.cls}`}>
             <LevelIcon size={24} />
           </span>
         </div>
@@ -490,7 +490,7 @@ function VerdictPanel({
             },
             { label: "Bank after", value: `£${verdict.bankAfter.toFixed(1)}m`, icon: Wallet, bad: verdict.bankAfter < 0 },
           ].map(({ label, value, icon: Icon, bad }) => (
-            <div key={label} className="rounded-xl bg-black/30 p-3 ring-1 ring-white/[0.06]">
+            <div key={label} className="rounded-xl bg-sunken p-3 ring-1 ring-fg/[0.06]">
               <dt className="flex items-center gap-1 text-[11px] text-muted">
                 <Icon size={12} /> {label}
               </dt>
@@ -504,7 +504,7 @@ function VerdictPanel({
             <NoteRow key={n.id} note={n} order={i} />
           ))}
           {verdict.notes.length === 0 && (
-            <li className="rounded-xl border border-line p-4 text-sm text-muted">
+            <li className="rounded-xl bg-fg/[0.03] p-4 text-sm text-muted">
               No red flags from your history. Make a transfer or change your captain to see what TopGaffer remembers.
             </li>
           )}
@@ -528,7 +528,7 @@ function VerdictPanel({
                 href={locked.sui.explorerUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-3 flex w-fit items-center gap-1.5 rounded-xl bg-white/5 px-3 py-2 text-xs font-semibold text-text ring-1 ring-white/10 hover:bg-white/10"
+                className="mt-3 flex w-fit items-center gap-1.5 rounded-xl bg-fg/5 px-3 py-2 text-xs font-semibold text-text ring-1 ring-fg/10 hover:bg-fg/10"
               >
                 <ShieldCheck size={14} className="text-good" /> Proof on Sui {locked.sui.network}
                 <ExternalLink size={12} className="text-muted" />
@@ -539,7 +539,7 @@ function VerdictPanel({
                 <button
                   onClick={onRetrySui}
                   disabled={saving}
-                  className="mt-2 inline-flex items-center gap-2 rounded-xl bg-volt px-3.5 py-2 text-sm font-semibold text-ink disabled:opacity-50"
+                  className="mt-2 inline-flex items-center gap-2 rounded-xl bg-volt px-3.5 py-2 text-sm font-semibold text-neutral-950 disabled:opacity-50"
                 >
                   {saving ? <Loader2 size={15} className="animate-spin" /> : <ShieldCheck size={15} />}
                   {saving ? "Recording on Sui…" : "Record on Sui now"}
@@ -598,7 +598,7 @@ function NoteRow({ note, order }: { note: Note; order: number }) {
         {note.people && note.people.length > 0 ? (
           <div className="mt-1.5 flex flex-wrap gap-1.5">
             {note.people.map((name) => (
-              <span key={name} className="inline-flex items-center gap-1.5 rounded-full bg-black/30 py-0.5 pr-2.5 pl-0.5 text-[11px] ring-1 ring-white/10">
+              <span key={name} className="inline-flex items-center gap-1.5 rounded-full bg-sunken py-0.5 pr-2.5 pl-0.5 text-[11px] ring-1 ring-fg/10">
                 <span className="grid size-5 place-items-center rounded-full bg-[var(--color-series-expert)] text-[9px] font-bold text-white">
                   {name
                     .split(" ")

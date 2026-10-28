@@ -129,7 +129,7 @@ export default function CoachPage() {
           <div className="flex-1 space-y-5 p-5">
             {messages.length === 0 ? (
               <div className="flex flex-col items-center py-10 text-center">
-                <div className="grid size-12 place-items-center rounded-xl bg-white/[0.06] text-volt ring-1 ring-line">
+                <div className="grid size-12 place-items-center rounded-xl bg-fg/[0.06] text-volt-text ring-1 ring-line">
                   <Sparkles size={22} />
                 </div>
                 <p className="mt-4 text-lg font-semibold">What do you want to know, {profile.managerName.split(" ")[0]}?</p>
@@ -150,7 +150,7 @@ export default function CoachPage() {
             <div ref={endRef} />
           </div>
 
-          <form onSubmit={onSubmit} className="sticky bottom-24 border-t border-line bg-surface/90 p-3 backdrop-blur md:bottom-0">
+          <form onSubmit={onSubmit} className="sticky bottom-24 rounded-b-[1.25rem] border-t border-line bg-surface/90 p-3 backdrop-blur md:bottom-0">
             {error && <p className="mb-2 px-1 text-sm text-bad">{error}</p>}
             <div className="flex items-end gap-2 rounded-xl border border-line-strong bg-ink p-1.5 focus-within:border-volt/60">
               <textarea
@@ -165,7 +165,7 @@ export default function CoachPage() {
               <button
                 type="submit"
                 disabled={busy || !input.trim()}
-                className="grid size-10 shrink-0 place-items-center rounded-xl bg-volt text-ink transition hover:bg-volt-deep disabled:opacity-40"
+                className="grid size-10 shrink-0 place-items-center rounded-xl bg-volt text-neutral-950 transition hover:bg-volt-deep disabled:opacity-40"
                 aria-label="Send"
               >
                 {busy ? <Loader2 size={18} className="animate-spin" /> : <Send size={17} />}
@@ -225,13 +225,13 @@ function Bubble({ m }: { m: Message }) {
   }
   return (
     <div className="flex animate-rise gap-3">
-      <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-white/[0.06] text-volt ring-1 ring-line">
+      <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-fg/[0.06] text-volt-text ring-1 ring-line">
         <Sparkles size={16} />
       </div>
       <div className="min-w-0 flex-1">
         {m.status === "thinking" || m.status === "retrying" ? (
           <p className="flex items-center gap-2 text-sm text-muted">
-            <Loader2 size={15} className="animate-spin text-volt" />
+            <Loader2 size={15} className="animate-spin text-volt-text" />
             {m.status === "retrying"
               ? "That model got overloaded mid-answer. Trying another…"
               : m.memories?.length
@@ -239,12 +239,12 @@ function Bubble({ m }: { m: Message }) {
                 : "Reading your season…"}
           </p>
         ) : (
-          <div className="rounded-xl rounded-tl-md bg-white/[0.03] px-4 py-3 text-sm leading-relaxed ring-1 ring-line">
+          <div className="rounded-xl rounded-tl-md bg-fg/[0.03] px-4 py-3 text-sm leading-relaxed ring-1 ring-line">
             <RichText text={m.text} />
             {m.status === "fallback" && m.memories && (
               <ul className="mt-2 space-y-1.5">
                 {m.memories.map((mem) => (
-                  <li key={mem.blobId} className="rounded-lg bg-black/25 px-3 py-2 text-xs text-text/85">
+                  <li key={mem.blobId} className="rounded-lg bg-sunken px-3 py-2 text-xs text-text/85">
                     {mem.text.replace(/^\[[^\]]+\]\s*/, "")}
                   </li>
                 ))}
@@ -261,7 +261,7 @@ function Bubble({ m }: { m: Message }) {
             {showMemories && (
               <ul className="mt-2 space-y-1.5">
                 {m.memories.map((mem) => (
-                  <li key={mem.blobId} className="rounded-lg border border-line bg-black/20 px-3 py-2 text-xs text-muted">
+                  <li key={mem.blobId} className="rounded-lg bg-fg/[0.04] px-3 py-2 text-xs text-muted">
                     {mem.text.replace(/^\[[^\]]+\]\s*/, "")}
                     <span className="num mt-1 block truncate text-[10px] text-faint">blob {mem.blobId}</span>
                   </li>

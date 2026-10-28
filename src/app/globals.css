@@ -1,7 +1,7 @@
 /* BoardUI design system: Tailwind, its theme tokens and type scale. TopGaffer layers its own tokens on top. */
 @import "../styles/globals.css";
 
-/* TopGaffer on BoardUI's neutral dark palette. One accent (volt), three signal colours. */
+/* TopGaffer tokens. These @theme values are the dark theme; html:not(.dark) below swaps in the light theme. */
 @theme {
   --color-ink: #121212;
   --color-pitch: #121212;
@@ -12,6 +12,11 @@
   --color-text: #fafafa;
   --color-muted: #a3a3a3;
   --color-faint: #737373;
+  /* Theme-aware overlays: fg is white in dark mode and black in light (use as bg-fg/[0.04]); sunken is a recessed well. */
+  --color-fg: #ffffff;
+  --color-sunken: rgb(0 0 0 / 0.25);
+  /* Volt as text: the fill colour is too light to read on a light surface. */
+  --color-volt-text: #d4ff3a;
 
   /* BoardUI's accent ramp (buttons, tabs, focus, selection) re-tinted to the TopGaffer volt. */
   --color-accent-50: #f9ffe6;
@@ -87,6 +92,38 @@ body {
   background-attachment: fixed;
 }
 
+/* Light theme. Same structure, BoardUI-style neutrals; signal and chart colours deepened for contrast on white
+   (chart pair validated on #ffffff: CVD ΔE 26.9, contrast ≥ 3:1). */
+html:not(.dark) {
+  color-scheme: light;
+  --color-ink: #f3f3f2;
+  --color-pitch: #f3f3f2;
+  --color-surface: #ffffff;
+  --color-raised: #ffffff;
+  --color-line: #e7e7e5;
+  --color-line-strong: #d6d6d3;
+  --color-text: #0a0a0a;
+  --color-muted: #5f5f5c;
+  --color-faint: #8c8c88;
+  --color-fg: #000000;
+  --color-sunken: rgb(0 0 0 / 0.04);
+  --color-volt-text: #4d6b00;
+  --color-good: #0e9f5a;
+  --color-warn: #b56b00;
+  --color-bad: #d63031;
+  --color-info: #2563eb;
+  --color-series-expert: #2a78d6;
+  --color-series-you: #6b8a00;
+  --color-series-avg: rgb(0 0 0 / 0.32);
+}
+
+/* White panels on a light grey page need a hairline and a soft lift to stay distinct. */
+html:not(.dark) .card {
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.05),
+    0 1px 2px rgb(0 0 0 / 0.04);
+}
+
 /* In the components layer so utility classes (gradients, rings) on a card can override it. */
 @layer components {
   /* Panels: separated by a lighter surface and space, not borders. Generous 20px corners. */
@@ -103,7 +140,7 @@ body {
 
   /* Card and section labels: quiet, sentence case. */
   .eyebrow {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     font-weight: 500;
     color: var(--color-muted);
   }

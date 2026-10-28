@@ -111,7 +111,7 @@ function Dashboard({
 
         <ul className="relative mt-6 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
           {insights.map((i) => (
-            <li key={i} className="flex gap-2.5 rounded-xl border border-line bg-black/20 p-3 text-sm">
+            <li key={i} className="flex gap-2.5 rounded-xl bg-fg/[0.04] p-3.5 text-sm">
               <Lightbulb size={15} className="mt-0.5 shrink-0 text-faint" />
               <span className="text-text/90">{i}</span>
             </li>
@@ -358,7 +358,7 @@ function TransferLog({ d, name }: { d: ExpertDetail; name: string }) {
         {[...d.transfers].reverse().map((t) => {
           const v = t.gain - t.hitCost;
           return (
-            <li key={t.gw} className="grid grid-cols-[3rem_1fr_auto] items-center gap-3 rounded-xl border border-line p-3 text-sm">
+            <li key={t.gw} className="grid grid-cols-[3rem_1fr_auto] items-center gap-3 rounded-xl bg-fg/[0.03] p-3 text-sm">
               <span className="num text-xs text-faint">GW{t.gw}</span>
               <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
                 <span className="flex flex-wrap gap-1.5">
@@ -379,7 +379,7 @@ function TransferLog({ d, name }: { d: ExpertDetail; name: string }) {
                 {t.hitCost > 0 && <span className="text-xs text-bad">−{t.hitCost} hit</span>}
                 {t.chasedHaul && <span className="text-xs text-warn">bought after a big haul</span>}
               </div>
-              <span className={`num rounded-md px-2 py-1 text-xs font-semibold ${v > 0 ? "bg-good/15 text-good" : v < 0 ? "bg-bad/15 text-bad" : "bg-white/5 text-muted"}`}>
+              <span className={`num rounded-md px-2 py-1 text-xs font-semibold ${v > 0 ? "bg-good/15 text-good" : v < 0 ? "bg-bad/15 text-bad" : "bg-fg/5 text-muted"}`}>
                 {fmtSigned(v)}
               </span>
             </li>
@@ -400,7 +400,7 @@ function ChipStrip({ chips, gws }: { chips: ExpertDetail["chips"]; gws: number[]
           const chip = chips.find((c) => c.gw === gw);
           return (
             <div key={gw} className="flex flex-1 flex-col items-center gap-1" title={chip ? `GW${gw}: ${CHIP_NAMES[chip.name] ?? chip.name}` : `GW${gw}`}>
-              <span className={`h-6 w-full rounded-md ${chip ? "bg-volt" : "bg-white/[0.05]"}`} />
+              <span className={`h-6 w-full rounded-md ${chip ? "bg-volt" : "bg-fg/[0.05]"}`} />
               <span className="num text-[9px] text-faint">{gw}</span>
             </div>
           );
@@ -433,18 +433,18 @@ function SquadCard({ d, name }: { d: ExpertDetail; name: string }) {
       </div>
       <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {POSITIONS.map((pos) => (
-          <div key={pos} className="rounded-xl border border-line bg-black/20 p-3">
+          <div key={pos} className="rounded-xl bg-fg/[0.03] p-3">
             <p className="eyebrow mb-2">{pos}</p>
             <ul className="space-y-1.5">
               {d.squad
                 .filter((p) => p.pos === pos)
                 .map((p) => (
-                  <li key={p.id} className={`flex items-center gap-2.5 rounded-xl px-2 py-1.5 ${p.benched ? "opacity-55" : "bg-white/[0.02]"}`}>
+                  <li key={p.id} className={`flex items-center gap-2.5 rounded-xl px-2 py-1.5 ${p.benched ? "opacity-55" : "bg-fg/[0.02]"}`}>
                     <TeamBadge team={p.team} size={26} />
                     <div className="min-w-0 flex-1">
                       <p className="flex items-center gap-1 truncate text-sm font-semibold">
                         {p.name}
-                        {p.isCaptain && <Crown size={12} className="text-volt" />}
+                        {p.isCaptain && <Crown size={12} className="text-volt-text" />}
                         {p.benched && <span className="text-[10px] font-normal text-faint">bench</span>}
                       </p>
                       <p className="text-[11px] text-muted">
@@ -452,7 +452,7 @@ function SquadCard({ d, name }: { d: ExpertDetail; name: string }) {
                       </p>
                     </div>
                     <span
-                      className={`num rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${p.selectedBy < 10 ? "bg-volt/15 text-volt" : "bg-white/5 text-muted"}`}
+                      className={`num rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${p.selectedBy < 10 ? "bg-volt/15 text-volt-text" : "bg-fg/5 text-muted"}`}
                       title="Owned by this share of FPL managers"
                     >
                       {p.selectedBy.toFixed(1)}%

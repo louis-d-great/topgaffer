@@ -6,6 +6,7 @@ import { Suspense, createContext, useContext, useEffect, type ReactNode } from "
 import { Brain, LayoutGrid, Loader2, LogOut, Sparkles, Timer, Users } from "lucide-react";
 import { KEYS, useHydrated, useLocal } from "@/lib/store";
 import { useApi } from "@/lib/use-api";
+import { ThemeToggle } from "./theme-toggle";
 import { useNow } from "@/lib/use-now";
 import { useMemorySync, type MemorySync } from "@/lib/use-memory-sync";
 import { timeUntil } from "@/lib/format";
@@ -40,7 +41,7 @@ export function useManager() {
 export function Logo({ compact = false }: { compact?: boolean }) {
   return (
     <span className="inline-flex items-center gap-2">
-      <span className="relative grid size-9 place-items-center rounded-xl bg-volt text-ink shadow-[0_0_24px_-6px_var(--color-volt)]">
+      <span className="relative grid size-9 place-items-center rounded-xl bg-volt text-neutral-950 shadow-[0_0_24px_-6px_var(--color-volt)]">
         <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
           <path d="M5 8h14M12 8v11" />
           <circle cx="12" cy="8" r="0.6" fill="currentColor" />
@@ -48,7 +49,7 @@ export function Logo({ compact = false }: { compact?: boolean }) {
       </span>
       {!compact && (
         <span className="font-brand text-xl font-bold tracking-tight">
-          Top<span className="text-volt">Gaffer</span>
+          Top<span className="text-volt-text">Gaffer</span>
         </span>
       )}
     </span>
@@ -81,7 +82,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <CurrentSideNav />
             </Suspense>
             {data && <GameweekCard profile={data} />}
-            <div className="mt-3 flex items-center gap-3 rounded-2xl bg-white/[0.03] p-2.5 ring-1 ring-line">
+            <div className="mt-3 flex items-center gap-3 rounded-2xl bg-fg/[0.03] p-2.5 ring-1 ring-line">
               <Avatar name={data?.managerName} />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold">{data?.teamName ?? "Loading…"}</p>
@@ -89,7 +90,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
               <button
                 onClick={() => setTeamId(null)}
-                className="grid size-8 shrink-0 place-items-center rounded-lg text-faint transition hover:bg-white/[0.06] hover:text-text"
+                className="grid size-8 shrink-0 place-items-center rounded-lg text-faint transition hover:bg-fg/[0.06] hover:text-text"
                 aria-label="Switch team"
                 title="Switch team"
               >
@@ -108,6 +109,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </span>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
+              <ThemeToggle />
               <MemoryPill memory={memory} />
               {data?.nextGw && <DeadlinePill gw={data.nextGw.id} deadline={data.nextGw.deadline} />}
               <span className="hidden items-center gap-2 rounded-full border border-line bg-surface py-1 pr-3 pl-1 text-sm sm:flex">
@@ -205,7 +207,7 @@ function GameweekCard({ profile }: { profile: ManagerProfile }) {
     ]);
   }
   return (
-    <div className="mt-auto rounded-2xl bg-white/[0.03] p-3 ring-1 ring-line">
+    <div className="mt-auto rounded-2xl bg-fg/[0.03] p-3 ring-1 ring-line">
       <p className="section-label">This gameweek</p>
       <dl className="mt-2 space-y-1.5">
         {rows.map(([k, v]) => (
@@ -255,7 +257,7 @@ function SideNav({ active }: { active: string | null }) {
             className={`flex h-11 items-center gap-3 rounded-xl px-3 text-[15px] font-medium transition ${
               on
                 ? "bg-linear-to-b from-accent-500 to-accent-600 text-neutral-950 shadow-[0_0_0_1px_var(--color-accent-500),inset_0_1px_0_0_rgb(255_255_255/0.35)]"
-                : "text-muted hover:bg-white/[0.05] hover:text-text"
+                : "text-muted hover:bg-fg/[0.05] hover:text-text"
             }`}
           >
             <Icon size={20} strokeWidth={on ? 2.2 : 1.8} />
@@ -276,9 +278,9 @@ function MobileNav({ active }: { active: string | null }) {
           <Link
             key={href}
             href={href}
-            className={`flex flex-col items-center gap-0.5 rounded-lg py-1.5 text-[10px] font-medium transition ${on ? "bg-white/[0.08] text-text" : "text-muted"}`}
+            className={`flex flex-col items-center gap-0.5 rounded-lg py-1.5 text-[10px] font-medium transition ${on ? "bg-fg/[0.08] text-text" : "text-muted"}`}
           >
-            <Icon size={18} strokeWidth={2} className={on ? "text-volt" : ""} />
+            <Icon size={18} strokeWidth={2} className={on ? "text-volt-text" : ""} />
             {label}
           </Link>
         );

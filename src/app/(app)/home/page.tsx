@@ -282,7 +282,7 @@ function LastGameweek({ profile }: { profile: ManagerProfile }) {
           {g.points}
           <span className="ml-1 text-base font-normal text-muted">pts</span>
         </p>
-        <span className={`rounded-md px-1.5 py-0.5 text-xs font-semibold ${diff >= 0 ? "bg-good/15 text-good" : "bg-white/[0.06] text-muted"}`}>
+        <span className={`rounded-md px-1.5 py-0.5 text-xs font-semibold ${diff >= 0 ? "bg-good/15 text-good" : "bg-fg/[0.06] text-muted"}`}>
           {fmtSigned(diff)} vs avg {g.average}
         </span>
       </div>
@@ -367,7 +367,7 @@ function LessonRow({ lesson, featured = false }: { lesson: Lesson; featured?: bo
   const Icon = t.icon;
   if (featured) {
     return (
-      <div className="mt-5 flex gap-4 rounded-2xl bg-white/[0.03] p-5">
+      <div className="mt-5 flex gap-4 rounded-2xl bg-fg/[0.03] p-5">
         <span className={`grid size-10 shrink-0 place-items-center rounded-xl ${t.bg} ${t.cls}`}>
           <Icon size={20} />
         </span>

@@ -84,7 +84,7 @@ export default function ExpertsPage() {
 function EmptyState({ onAdd }: { onAdd: () => void }) {
   return (
     <div className="card flex flex-col items-center px-6 py-14 text-center">
-      <div className="grid size-12 place-items-center rounded-xl bg-white/[0.06] text-muted">
+      <div className="grid size-12 place-items-center rounded-xl bg-fg/[0.06] text-muted">
         <Trophy size={26} />
       </div>
       <p className="mt-4 text-lg font-semibold">Track experts by what they actually do</p>
@@ -92,7 +92,7 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
         Add an expert&apos;s FPL team ID. TopGaffer reads their real captains, transfers and hits from GW1, scores them, and keeps
         their record up to date every gameweek. No typing in picks.
       </p>
-      <button onClick={onAdd} className="mt-6 rounded-xl bg-volt px-5 py-3 text-sm font-semibold text-ink">
+      <button onClick={onAdd} className="mt-6 rounded-xl bg-volt px-5 py-3 text-sm font-semibold text-neutral-950">
         Add an expert by team ID
       </button>
     </div>
@@ -123,7 +123,7 @@ function Leaderboard({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[720px] text-sm">
           <thead>
-            <tr className="border-b border-line bg-white/[0.02] text-left text-xs text-muted">
+            <tr className="border-b border-line bg-fg/[0.02] text-left text-xs text-muted">
               <th className="py-3 pl-5 font-medium">#</th>
               <th className="py-3 font-medium">Expert</th>
               <th className="py-3 text-right font-medium">Points</th>
@@ -156,7 +156,7 @@ function Leaderboard({
                 <tr
                   key={t.expert.teamId}
                   onClick={() => onSelect(t.expert.teamId)}
-                  className={`group cursor-pointer border-t border-line transition ${active ? "bg-white/[0.04]" : "hover:bg-white/[0.02]"}`}
+                  className={`group cursor-pointer border-t border-line transition ${active ? "bg-fg/[0.04]" : "hover:bg-fg/[0.02]"}`}
                 >
                   <td className={`num py-3 pl-5 font-medium ${i === 0 ? "text-text" : "text-faint"}`}>{i + 1}</td>
                   <td className="py-3">
@@ -200,7 +200,7 @@ function Leaderboard({
 function ExpertName({ expert, profile }: { expert: Expert; profile: ExpertProfile }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="num grid size-8 shrink-0 place-items-center rounded-lg bg-white/[0.06] text-[10px] font-semibold text-muted ring-1 ring-line">
+      <span className="num grid size-8 shrink-0 place-items-center rounded-lg bg-fg/[0.06] text-[10px] font-semibold text-muted ring-1 ring-line">
         {expert.country === "XX" ? "··" : expert.country}
       </span>
       <div className="min-w-0">
@@ -232,12 +232,12 @@ function HeadToHeadPanel({ tracked, you }: { tracked: TrackedExpert; you: Manage
         <p className="eyebrow">Captains: {expert.name} vs you</p>
         <Link
           href={`/experts/${expert.teamId}`}
-          className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-volt px-2.5 py-1.5 text-xs font-semibold text-ink"
+          className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-volt px-2.5 py-1.5 text-xs font-semibold text-neutral-950"
         >
           Full dashboard <ArrowUpRight size={13} />
         </Link>
       </div>
-      <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl bg-black/25 p-3 text-center">
+      <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl bg-sunken p-3 text-center">
         <div>
           <p className="num text-xl font-semibold text-warn">{h2h.theyWon}</p>
           <p className="text-[11px] text-muted">their weeks</p>
@@ -265,7 +265,7 @@ function HeadToHeadPanel({ tracked, you }: { tracked: TrackedExpert; you: Manage
           const mine = yours.get(c.gw);
           const diff = mine ? c.points - mine.points : null;
           return (
-            <li key={c.gw} className="grid grid-cols-[3rem_1fr_1fr] items-center gap-2 rounded-xl border border-line px-3 py-2 text-xs">
+            <li key={c.gw} className="grid grid-cols-[3rem_1fr_1fr] items-center gap-2 rounded-xl bg-fg/[0.03] px-3 py-2 text-xs">
               <span className="num text-faint">GW{c.gw}</span>
               <span className={`truncate ${diff !== null && diff > 0 ? "font-semibold text-text" : "text-muted"}`}>
                 {c.name} <span className="num">{c.points}</span>
@@ -331,7 +331,7 @@ function AddExpert({ onClose, onSave }: { onClose: () => void; onSave: (e: Exper
       <div onClick={(e) => e.stopPropagation()} className="card w-full max-w-md animate-rise rounded-b-none p-5 sm:rounded-b-[1.25rem]">
         <div className="mb-4 flex items-center justify-between">
           <p className="text-base font-semibold">Add an expert</p>
-          <button onClick={onClose} className="rounded-full p-2 text-muted hover:bg-white/5" aria-label="Close">
+          <button onClick={onClose} className="rounded-full p-2 text-muted hover:bg-fg/5" aria-label="Close">
             <X size={18} />
           </button>
         </div>
@@ -348,7 +348,7 @@ function AddExpert({ onClose, onSave }: { onClose: () => void; onSave: (e: Exper
           <button
             type="submit"
             disabled={!teamId || checking}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-white/10 px-4 text-sm font-semibold hover:bg-white/15 disabled:opacity-40"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-fg/10 px-4 text-sm font-semibold hover:bg-fg/15 disabled:opacity-40"
           >
             {checking ? <Loader2 size={15} className="animate-spin" /> : <Search size={15} />} Check
           </button>
@@ -375,7 +375,7 @@ function AddExpert({ onClose, onSave }: { onClose: () => void; onSave: (e: Exper
                   type="button"
                   key={p}
                   onClick={() => setPlatform(p)}
-                  className={`rounded-xl border py-2 text-sm font-medium ${platform === p ? "border-line-strong bg-white/[0.08] text-text" : "border-line-strong text-muted"}`}
+                  className={`rounded-xl border py-2 text-sm font-medium ${platform === p ? "border-line-strong bg-fg/[0.08] text-text" : "border-line-strong text-muted"}`}
                 >
                   {p === "x" ? "X" : p === "youtube" ? "YouTube" : "Other"}
                 </button>
@@ -388,7 +388,7 @@ function AddExpert({ onClose, onSave }: { onClose: () => void; onSave: (e: Exper
                 </option>
               ))}
             </select>
-            <button onClick={save} disabled={!name.trim()} className="w-full rounded-xl bg-volt py-3 font-semibold text-ink disabled:opacity-40">
+            <button onClick={save} disabled={!name.trim()} className="w-full rounded-xl bg-volt py-3 font-semibold text-neutral-950 disabled:opacity-40">
               Track this expert
             </button>
           </div>

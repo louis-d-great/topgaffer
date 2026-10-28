@@ -22,9 +22,15 @@ export const viewport: Viewport = {
   themeColor: "#121212",
 };
 
+// Applies the saved theme before first paint, so light mode never flashes dark. Dark is the default.
+const THEME_SCRIPT = `try{if(JSON.parse(localStorage.getItem("tg.theme"))==="light")document.documentElement.classList.remove("dark")}catch(e){}`;
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`dark ${bricolage.variable} ${inter.variable} h-full`}>
+    <html lang="en" className={`dark ${bricolage.variable} ${inter.variable} h-full`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="pitch-bg min-h-full">{children}</body>
     </html>
   );
