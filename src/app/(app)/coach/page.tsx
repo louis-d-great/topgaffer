@@ -6,6 +6,7 @@ import { useManager } from "@/components/app-shell";
 import { PageHeader, Skeleton } from "@/components/ui";
 import { useExperts } from "@/lib/experts";
 import { useLocal } from "@/lib/store";
+import { Button } from "@/components/base/buttons/button";
 
 interface Message {
   role: "user" | "coach";
@@ -117,12 +118,9 @@ export default function CoachPage() {
     <div className="stagger">
       <PageHeader eyebrow="Your FPL coach with a memory" title="Ask TopGaffer">
         {messages.length > 0 && (
-          <button
-            onClick={() => setMessages([])}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-line-strong px-3 py-2 text-sm text-muted hover:text-text"
-          >
-            <RotateCcw size={14} /> New chat
-          </button>
+          <Button variant="secondary" size="small" leadingIcon={RotateCcw} onClick={() => setMessages([])}>
+            New chat
+          </Button>
         )}
       </PageHeader>
 

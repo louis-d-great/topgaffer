@@ -9,6 +9,8 @@ import { captainHeadToHead, useExperts, type TrackedExpert } from "@/lib/experts
 import { fmtRank, fmtSigned, pct } from "@/lib/format";
 import type { ExpertProfile, ManagerProfile } from "@/lib/fpl/types";
 import type { Expert } from "@/lib/store";
+import { Button } from "@/components/base/buttons/button";
+import { Chip } from "@/components/base/badges/chip";
 
 const COUNTRIES: [string, string][] = [
   ["NG", "Nigeria"],
@@ -39,12 +41,9 @@ export default function ExpertsPage() {
   return (
     <div className="stagger">
       <PageHeader eyebrow="Tracked from their real FPL teams · updates every gameweek" title="Expert tracker">
-        <button
-          onClick={() => setAdding(true)}
-          className="inline-flex items-center gap-2 rounded-xl bg-volt px-4 py-2.5 text-sm font-semibold text-ink"
-        >
-          <UserPlus size={16} /> Add expert
-        </button>
+        <Button onClick={() => setAdding(true)} leadingIcon={UserPlus}>
+          Add expert
+        </Button>
       </PageHeader>
 
       {experts.loading || !profile ? (
@@ -124,7 +123,7 @@ function Leaderboard({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[720px] text-sm">
           <thead>
-            <tr className="text-left text-[11px] tracking-wider text-faint uppercase">
+            <tr className="border-b border-line bg-white/[0.02] text-left text-xs text-muted">
               <th className="py-3 pl-5 font-medium">#</th>
               <th className="py-3 font-medium">Expert</th>
               <th className="py-3 text-right font-medium">Points</th>
@@ -170,13 +169,9 @@ function Leaderboard({
                     {t.profile.stats.hits ? `${t.profile.stats.hitsPaidOff}/${t.profile.stats.hits}` : "—"}
                   </td>
                   <td className="py-3 pr-5 text-right">
-                    <span
-                      className={`num rounded-md px-2 py-1 text-xs font-semibold ${
-                        h2h.theyWon > h2h.youWon ? "bg-warn/15 text-warn" : h2h.youWon > h2h.theyWon ? "bg-good/15 text-good" : "bg-white/5 text-muted"
-                      }`}
-                    >
+                    <Chip variant="caption" color={h2h.theyWon > h2h.youWon ? "orange" : h2h.youWon > h2h.theyWon ? "lime" : "neutral"} className="num">
                       {h2h.theyWon}–{h2h.youWon}
-                    </span>
+                    </Chip>
                   </td>
                   <td className="pr-3">
                     {canRemove(t.expert.teamId) && (

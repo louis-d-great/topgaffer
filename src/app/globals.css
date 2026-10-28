@@ -1,16 +1,30 @@
-@import "tailwindcss";
+/* BoardUI design system: Tailwind, its theme tokens and type scale. TopGaffer layers its own tokens on top. */
+@import "../styles/globals.css";
 
-/* TopGaffer: floodlit-pitch dark theme. One accent (volt), three signal colours. */
+/* TopGaffer on BoardUI's neutral dark palette. One accent (volt), three signal colours. */
 @theme {
-  --color-ink: #06080a;
-  --color-pitch: #0b0f12;
-  --color-surface: #11161a;
-  --color-raised: #171e23;
-  --color-line: rgb(255 255 255 / 0.07);
-  --color-line-strong: rgb(255 255 255 / 0.13);
-  --color-text: #eef2ef;
-  --color-muted: #8b9690;
-  --color-faint: #5b6560;
+  --color-ink: #121212;
+  --color-pitch: #121212;
+  --color-surface: #171717;
+  --color-raised: #212121;
+  --color-line: #262626;
+  --color-line-strong: #383838;
+  --color-text: #fafafa;
+  --color-muted: #a3a3a3;
+  --color-faint: #737373;
+
+  /* BoardUI's accent ramp (buttons, tabs, focus, selection) re-tinted to the TopGaffer volt. */
+  --color-accent-50: #f9ffe6;
+  --color-accent-100: #f1ffc2;
+  --color-accent-200: #e6ff8f;
+  --color-accent-300: #dcff61;
+  --color-accent-400: #d8ff4d;
+  --color-accent-500: #d4ff3a;
+  --color-accent-600: #b9e01f;
+  --color-accent-700: #93b414;
+  --color-accent-800: #6f8a12;
+  --color-accent-900: #4a5c0e;
+  --color-accent-950: #2b3607;
   --color-volt: #d4ff3a;
   --color-volt-deep: #a8d11a;
   --color-good: #3ddc97;
@@ -25,10 +39,9 @@
   --color-series-avg: rgb(255 255 255 / 0.32);
 
   /* One sans for all product text; the brand face is only for the wordmark. */
-  --font-display: var(--font-geist-sans);
+  --font-display: var(--font-inter);
   --font-brand: var(--font-bricolage);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
   --animate-rise: rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-glow: glow 3.2s ease-in-out infinite;

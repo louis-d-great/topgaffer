@@ -10,6 +10,7 @@ import { useNow } from "@/lib/use-now";
 import { useMemorySync, type MemorySync } from "@/lib/use-memory-sync";
 import { timeUntil } from "@/lib/format";
 import type { ManagerProfile } from "@/lib/fpl/types";
+import { Avatar as BoardAvatar } from "@/components/base/avatar/avatar";
 
 const NAV = [
   { href: "/home", label: "Home", icon: LayoutGrid },
@@ -137,15 +138,7 @@ function Avatar({ name, size = 36 }: { name?: string; size?: number }) {
     .map((w) => w[0])
     .join("")
     .toUpperCase();
-  return (
-    <span
-      className="grid shrink-0 place-items-center rounded-full bg-white/10 font-semibold text-text ring-1 ring-white/10"
-      style={{ width: size, height: size, fontSize: size * 0.38 }}
-      aria-hidden
-    >
-      {initials || "·"}
-    </span>
-  );
+  return <BoardAvatar size={size >= 32 ? "md" : "sm"} initials={initials || "·"} aria-hidden />;
 }
 
 function DeadlinePill({ gw, deadline }: { gw: number; deadline: string }) {

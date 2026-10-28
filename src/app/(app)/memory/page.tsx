@@ -7,6 +7,10 @@ import { ErrorCard, PageHeader, Skeleton, ToneChip } from "@/components/ui";
 import type { Lesson, LessonTone } from "@/lib/fpl/types";
 import { KEYS, useLocal, type LockedPlan } from "@/lib/store";
 import type { SavedMemory } from "@/lib/use-memory-sync";
+import { Button } from "@/components/base/buttons/button";
+import { SegmentedControl, SegmentedControlItem } from "@/components/base/segmented-control/segmented-control";
+
+const Spinner = ({ className }: { className?: string }) => <Loader2 className={`animate-spin ${className ?? ""}`} />;
 
 const SUGGESTIONS = ["Am I bad at captaincy?", "Do my hits pay off?", "Points left on the bench", "Who did I transfer in?"];
 const FILTERS: { key: "all" | LessonTone; label: string }[] = [
@@ -70,17 +74,17 @@ export default function MemoryPage() {
 
       <section>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex gap-1 rounded-lg border border-line p-0.5">
+          <SegmentedControl
+            aria-label="Filter lessons"
+            selectedKeys={[filter]}
+            onSelectionChange={(keys) => setFilter([...keys][0] as "all" | LessonTone)}
+          >
             {FILTERS.map((f) => (
-              <button
-                key={f.key}
-                onClick={() => setFilter(f.key)}
-                className={`rounded-md px-3 py-1.5 text-sm transition ${filter === f.key ? "bg-white/[0.08] text-text" : "text-muted hover:text-text"}`}
-              >
+              <SegmentedControlItem key={f.key} id={f.key}>
                 {f.label}
-              </button>
+              </SegmentedControlItem>
             ))}
-          </div>
+          </SegmentedControl>
           {memory.error && <p className="text-xs text-bad">{memory.error}</p>}
         </div>
         <div className="mt-3 grid gap-3 lg:grid-cols-2">
@@ -217,13 +221,9 @@ function AskMemory({ teamId }: { teamId: number }) {
           placeholder="Search your memory, e.g. “do my hits pay off?”"
           className="min-w-0 flex-1 bg-transparent px-1 py-2 text-sm outline-none placeholder:text-faint"
         />
-        <button
-          type="submit"
-          disabled={busy || !q.trim()}
-          className="inline-flex items-center gap-1.5 rounded-md bg-volt px-3 py-1.5 text-sm font-semibold text-ink disabled:opacity-40"
-        >
-          {busy && <Loader2 size={14} className="animate-spin" />} Recall
-        </button>
+        <Button type="submit" size="small" disabled={busy || !q.trim()} leadingIcon={busy ? Spinner : undefined}>
+          Recall
+        </Button>
       </form>
       <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-faint">
         Try:

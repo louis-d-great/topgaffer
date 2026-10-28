@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { SegmentedControl, SegmentedControlItem } from "@/components/base/segmented-control/segmented-control";
 
 /*
  * Hand-rolled SVG charts following the dataviz method: thin marks, hairline
@@ -100,17 +101,14 @@ export function ChartCard({
         <div className="flex items-center gap-3">
           {action}
           {table && (
-            <div className="flex rounded-lg border border-line p-0.5 text-[11px]">
-              {(["chart", "table"] as const).map((v) => (
-                <button
-                  key={v}
-                  onClick={() => setView(v)}
-                  className={`rounded-md px-2 py-1 capitalize ${view === v ? "bg-white/10 text-text" : "text-muted hover:text-text"}`}
-                >
-                  {v}
-                </button>
-              ))}
-            </div>
+            <SegmentedControl
+              aria-label="View as"
+              selectedKeys={[view]}
+              onSelectionChange={(keys) => setView([...keys][0] as "chart" | "table")}
+            >
+              <SegmentedControlItem id="chart">Chart</SegmentedControlItem>
+              <SegmentedControlItem id="table">Table</SegmentedControlItem>
+            </SegmentedControl>
           )}
         </div>
       </div>

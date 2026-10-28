@@ -12,6 +12,9 @@ import type { DeadlineData, ManagerProfile, Position, SquadPlayer } from "@/lib/
 import { KEYS, useLocal, type LockedPlan } from "@/lib/store";
 import { useApi } from "@/lib/use-api";
 import { fingerprint, judgePlan, type Note, type Verdict } from "@/lib/verdict";
+import { Button } from "@/components/base/buttons/button";
+
+const Spinner = ({ className }: { className?: string }) => <Loader2 className={`animate-spin ${className ?? ""}`} />;
 
 export default function DeadlinePage() {
   const { teamId, profile, error: profileError } = useManager();
@@ -559,14 +562,14 @@ function VerdictPanel({
             )}
           </div>
         ) : (
-          <button
+          <Button
             onClick={onLock}
             disabled={verdict.level === "blocked" || saving}
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-volt py-3.5 font-semibold text-ink shadow-[0_10px_30px_-10px_var(--color-volt)] transition hover:bg-volt-deep disabled:opacity-40 disabled:shadow-none"
+            leadingIcon={saving ? Spinner : Lock}
+            className="mt-6 w-full"
           >
-            {saving ? <Loader2 size={17} className="animate-spin" /> : <Lock size={17} />}
             {saving ? "Locking on Sui…" : verdict.level === "think" ? "Lock it anyway" : "Lock my plan"}
-          </button>
+          </Button>
         )}
       </div>
     </div>
