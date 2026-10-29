@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Check, ExternalLink, Info, Loader2, Search, Undo2 } from "lucide-react";
+import { AlertTriangle, CalendarDays, Check, CheckCircle2, Database, ExternalLink, Info, Lightbulb, Loader2, Lock, Search, Sparkles, Undo2 } from "lucide-react";
 import { useManager } from "@/components/app-shell";
+import { ActionRow, CountBadge, Panel, PanelLink, StatCard, type Tone } from "@/components/panel";
 import { ErrorCard, PageHeader, Skeleton, ToneChip } from "@/components/ui";
 import type { Lesson, LessonTone } from "@/lib/fpl/types";
 import { KEYS, useLocal, type LockedPlan } from "@/lib/store";
@@ -49,30 +50,24 @@ export default function MemoryPage() {
 
       <AskMemory teamId={teamId} />
 
-      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
-        {[
-          { label: "Lessons", value: active.length },
-          { label: "Watch outs", value: count("warning"), dot: "bg-warn" },
-          { label: "Strengths", value: count("strength"), dot: "bg-good" },
-          {
-            label: "Memories on Walrus",
-            value: memory.saved,
-            hint: memory.pending ? `${memory.pending} saving` : "mainnet",
-          },
-          { label: "Plans locked", value: locks.length, hint: locks[0]?.sui ? "on Sui" : undefined },
-        ].map((s) => (
-          <div key={s.label} className="card p-4">
-            <dt className="flex items-center gap-1.5 text-xs text-muted">
-              {s.dot && <span className={`size-1.5 rounded-full ${s.dot}`} />}
-              {s.label}
-            </dt>
-            <dd className="mt-1 flex items-baseline gap-2">
-              <span className="num text-2xl font-semibold tracking-tight">{s.value}</span>
-              {s.hint && <span className="text-xs text-faint">{s.hint}</span>}
-            </dd>
-          </div>
-        ))}
-      </dl>
+      <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 xl:grid-cols-5">
+        <StatCard label="Lessons" icon={Lightbulb} value={active.length} context={{ text: `from ${profile.gameweeks.length} gameweeks` }} />
+        <StatCard label="Watch outs" icon={AlertTriangle} value={count("warning")} context={{ text: "patterns costing you points", tone: count("warning") ? "warning" : undefined }} />
+        <StatCard label="Strengths" icon={CheckCircle2} value={count("strength")} context={{ text: "keep doing these", tone: count("strength") ? "good" : undefined }} />
+        <StatCard
+          label="Memories on Walrus"
+          icon={Database}
+          value={memory.saved}
+          context={{ text: memory.pending ? `${memory.pending} saving now` : "stored on mainnet", tone: memory.pending ? "info" : "good" }}
+        />
+        <StatCard
+          label="Plans locked"
+          icon={Lock}
+          value={locks.length}
+          context={{ text: locks[0]?.sui ? "latest proven on Sui" : "lock one before the deadline" }}
+          footer={{ label: "Go to deadline", href: "/deadline" }}
+        />
+      </div>
 
       <section>
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -114,51 +109,52 @@ export default function MemoryPage() {
       </section>
 
       <div className="grid items-start gap-5 xl:grid-cols-12">
-        <section className="card xl:col-span-8">
-          <div className="flex items-center justify-between border-b border-line px-4 py-3">
-            <h2 className="text-sm font-semibold">Memory timeline</h2>
-            {memory.pending > 0 && (
-              <span className="inline-flex items-center gap-1.5 text-xs text-muted">
-                <Loader2 size={12} className="animate-spin" /> {memory.pending} saving to Walrus
-              </span>
-            )}
-          </div>
-          <ol className="divide-y divide-line">
-            {timeline.map((m) => (
-              <li key={m.key} className="grid gap-1 px-4 py-3 sm:grid-cols-[9rem_1fr_auto] sm:gap-4">
-                <span className="text-xs text-muted">{label(m.key)}</span>
-                <span className="text-sm text-text/85">{m.text ? stripTag(m.text) : "—"}</span>
-                <WalrusStatus saved={m} />
-              </li>
-            ))}
-            {timeline.length === 0 && <li className="px-4 py-6 text-sm text-muted">Your season is being written to Walrus…</li>}
-          </ol>
-        </section>
+        <Panel
+          className="xl:col-span-8"
+          title="Memory timeline"
+          subtitle="Everything TopGaffer has written to Walrus for your team"
+          action={memory.pending > 0 ? <CountBadge tone="info">{memory.pending} saving</CountBadge> : <CountBadge>{timeline.length} entries</CountBadge>}
+        >
+          <ul className="divide-y divide-line">
+            {timeline.map((m) => {
+              const kind = kindOf(m.key);
+              return (
+                <ActionRow
+                  key={m.key}
+                  icon={kind.icon}
+                  tone={kind.tone}
+                  title={label(m.key)}
+                  subtitle={m.text ? stripTag(m.text) : undefined}
+                  right={<WalrusStatus saved={m} />}
+                />
+              );
+            })}
+            {timeline.length === 0 && <li className="px-5 py-6 text-sm text-muted">Your season is being written to Walrus…</li>}
+          </ul>
+        </Panel>
 
-        <section className="card xl:col-span-4">
-          <h2 className="border-b border-line px-4 py-3 text-sm font-semibold">Locked plans</h2>
+        <Panel className="xl:col-span-4" title="Locked plans" subtitle="Fingerprints frozen on Sui" action={<PanelLink href="/deadline">Deadline</PanelLink>}>
           <ul className="divide-y divide-line">
             {locks.map((p) => (
-              <li key={p.gw} className="px-4 py-3 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">GW{p.gw}</span>
-                  {p.sui ? (
-                    <a href={p.sui.explorerUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-muted hover:text-text">
-                      <Check size={12} className="text-good" /> On Sui <ExternalLink size={11} />
+              <ActionRow
+                key={p.gw}
+                leading={<span className="w-11 shrink-0 text-sm font-semibold text-volt-text">GW{p.gw}</span>}
+                title={`Captain ${name(p.captain)}`}
+                subtitle={p.transfersIn.length > 0 ? `In: ${p.transfersIn.map(name).join(", ")}` : "No transfers"}
+                right={
+                  p.sui ? (
+                    <a href={p.sui.explorerUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-good hover:underline">
+                      On Sui <ExternalLink size={11} />
                     </a>
                   ) : (
-                    <span className="text-xs text-faint">This device only</span>
-                  )}
-                </div>
-                <p className="mt-0.5 text-muted">
-                  Captain {name(p.captain)}
-                  {p.transfersIn.length > 0 && ` · in: ${p.transfersIn.map(name).join(", ")}`}
-                </p>
-              </li>
+                    <span className="text-xs text-faint">This device</span>
+                  )
+                }
+              />
             ))}
-            {locks.length === 0 && <li className="px-4 py-4 text-sm text-muted">Lock a plan on the Deadline page and it appears here.</li>}
+            {locks.length === 0 && <li className="px-5 py-6 text-sm text-muted">Lock a plan on the Deadline page and it appears here.</li>}
           </ul>
-        </section>
+        </Panel>
       </div>
     </div>
   );
@@ -307,6 +303,13 @@ function label(key: string) {
   if (key.startsWith("lesson-")) return `Lesson · ${key.split("-")[1]}`;
   if (key.startsWith("coach-")) return "Coach chat";
   return key;
+}
+
+function kindOf(key: string): { icon: typeof Lock; tone: Tone } {
+  if (key.includes("-plan-")) return { icon: Lock, tone: "good" };
+  if (key.startsWith("lesson-")) return { icon: Lightbulb, tone: "warning" };
+  if (key.startsWith("coach-")) return { icon: Sparkles, tone: "info" };
+  return { icon: CalendarDays, tone: "neutral" };
 }
 
 /** Newest first: plans, then lessons, then reviews within a gameweek. */

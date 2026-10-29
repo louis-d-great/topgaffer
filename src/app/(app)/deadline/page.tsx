@@ -7,6 +7,7 @@ import { PlayerPicker } from "@/components/player-picker";
 import { FixtureChip, Jersey } from "@/components/kit";
 import { ErrorCard, FdrPill, PageHeader, Skeleton, TeamBadge } from "@/components/ui";
 import { useExperts } from "@/lib/experts";
+import { ActionRow, CountBadge, IconTile, Panel, RowGroup, type Tone } from "@/components/panel";
 import { fmtDeadline } from "@/lib/format";
 import type { DeadlineData, ManagerProfile, Position, SquadPlayer } from "@/lib/fpl/types";
 import { KEYS, useLocal, type LockedPlan } from "@/lib/store";
@@ -248,6 +249,13 @@ function DeadlineCheck({ data, profile, teamId }: { data: DeadlineData; profile:
             onEdit={() => setEditing(true)}
             lockError={lockError}
             onRetrySui={retrySui}
+            onNote={(n) => {
+              // Notes about a player select that player on the pitch, ready to captain or sell.
+              const pid = n.id.startsWith("flag-") || n.id.startsWith("chase-") ? Number(n.id.split("-")[1]) : n.id.startsWith("cap-") ? captain : null;
+              if (!editing || pid === null) return undefined;
+              const target = squad.find((p) => p.id === pid);
+              return target ? () => setSelected(originalId(target)) : undefined;
+            }}
           />
         </aside>
       </div>
@@ -411,29 +419,22 @@ function SelectedBar({
 }
 
 const LEVELS = {
-  solid: {
-    label: "Good to go",
-    sub: "Nothing here repeats a past mistake.",
-    cls: "text-good",
-    card: "from-good/[0.16] via-good/[0.04] ring-good/25",
-    icon: ShieldCheck,
-  },
-  think: {
-    label: "Think twice",
-    sub: "You've been here before. Here's what happened.",
-    cls: "text-warn",
-    card: "from-warn/[0.18] via-warn/[0.04] ring-warn/25",
-    icon: AlertTriangle,
-  },
-  blocked: {
-    label: "Fix this first",
-    sub: "This plan breaks an FPL rule.",
-    cls: "text-bad",
-    card: "from-bad/[0.18] via-bad/[0.04] ring-bad/25",
-    icon: ShieldAlert,
-  },
+  solid: { label: "Good to go", sub: "Nothing here repeats a past mistake.", cls: "text-good", tone: "good", icon: ShieldCheck },
+  think: { label: "Think twice", sub: "You've been here before. Here's what happened.", cls: "text-warn", tone: "warning", icon: AlertTriangle },
+  blocked: { label: "Fix this first", sub: "This plan breaks an FPL rule.", cls: "text-bad", tone: "bad", icon: ShieldAlert },
+} as const;
+
+const NOTE_TONE: Record<Note["tone"], { tone: Tone; icon: typeof AlertTriangle }> = {
+  blocker: { tone: "bad", icon: ShieldAlert },
+  warning: { tone: "warning", icon: AlertTriangle },
+  info: { tone: "info", icon: Users },
+  strength: { tone: "good", icon: CheckCircle2 },
 };
 
+/**
+ * The verdict as an "attention required" list: what to fix or check first, then what's worth knowing.
+ * Rows about a specific player select that player on the pitch.
+ */
 function VerdictPanel({
   verdict,
   captain,
@@ -444,6 +445,7 @@ function VerdictPanel({
   onEdit,
   lockError,
   onRetrySui,
+  onNote,
 }: {
   verdict: Verdict;
   captain: string;
@@ -454,67 +456,106 @@ function VerdictPanel({
   onEdit: () => void;
   lockError: string | null;
   onRetrySui: () => void;
+  /** Returns a handler when the note points at a player who can be selected. */
+  onNote: (note: Note) => (() => void) | undefined;
 }) {
   const level = LEVELS[verdict.level];
-  const LevelIcon = level.icon;
   const [showDetails, setShowDetails] = useState(false);
   // Only claim "you've been here before" when a warning actually comes from the manager's history.
   const fromMemory = verdict.notes.some((n) => n.tone === "warning" && (n.id === "hit" || n.id.startsWith("chase-")));
   const sub = verdict.level === "think" && !fromMemory ? "A few things to check before you lock." : level.sub;
+  const attention = verdict.notes.filter((n) => n.tone === "blocker" || n.tone === "warning");
+  const context = verdict.notes.filter((n) => n.tone === "info" || n.tone === "strength");
+
+  const row = (n: Note) => {
+    const t = NOTE_TONE[n.tone];
+    return (
+      <ActionRow
+        key={n.id}
+        icon={t.icon}
+        tone={t.tone}
+        title={n.title}
+        onClick={onNote(n)}
+        subtitle={
+          n.people && n.people.length > 0 ? (
+            <span className="mt-1 flex flex-wrap gap-1">
+              {n.people.map((name) => (
+                <span key={name} className="inline-flex items-center gap-1 rounded-full bg-fg/[0.05] py-0.5 pr-2 pl-0.5 text-[11px] text-text/80">
+                  <span className="grid size-4 place-items-center rounded-full bg-[var(--color-series-expert)] text-[8px] font-bold text-white">
+                    {name
+                      .split(" ")
+                      .map((w) => w[0])
+                      .slice(0, 2)
+                      .join("")}
+                  </span>
+                  {name}
+                </span>
+              ))}
+            </span>
+          ) : (
+            n.because
+          )
+        }
+      />
+    );
+  };
+
   return (
-    <div className={`card relative overflow-hidden bg-gradient-to-b to-transparent ring-1 ${level.card}`}>
-      <div className="relative p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="eyebrow">TopGaffer&apos;s verdict</p>
-            <p className={`mt-1 text-3xl font-semibold tracking-tight ${level.cls}`}>{level.label}</p>
-            <p className="mt-1 text-sm text-muted">{sub}</p>
-          </div>
-          <span className={`grid size-12 shrink-0 place-items-center rounded-xl bg-sunken ring-1 ring-fg/10 ${level.cls}`}>
-            <LevelIcon size={24} />
-          </span>
+    <Panel
+      title="TopGaffer's verdict"
+      subtitle="Checked against your own history"
+      action={
+        <CountBadge tone={attention.length ? (verdict.level === "blocked" ? "bad" : "warning") : "good"}>
+          {attention.length ? `${attention.length} to check` : "All clear"}
+        </CountBadge>
+      }
+    >
+      <div className="flex items-center gap-4 px-5 py-5">
+        <IconTile icon={level.icon} tone={level.tone} size="lg" />
+        <div className="min-w-0">
+          <p className={`text-2xl font-semibold tracking-tight ${level.cls}`}>{level.label}</p>
+          <p className="mt-0.5 text-sm text-muted">{sub}</p>
         </div>
+      </div>
 
-        <dl className="mt-5 grid grid-cols-3 gap-2">
-          {[
-            { label: "Captain", value: captain, icon: Crown },
-            {
-              label: "Transfers",
-              value: (
-                <>
-                  {transfers}
-                  {verdict.hitCost > 0 && <span className="ml-1 text-base text-bad">−{verdict.hitCost}</span>}
-                </>
-              ),
-              icon: ArrowDownUp,
-            },
-            { label: "Bank after", value: `£${verdict.bankAfter.toFixed(1)}m`, icon: Wallet, bad: verdict.bankAfter < 0 },
-          ].map(({ label, value, icon: Icon, bad }) => (
-            <div key={label} className="rounded-xl bg-sunken p-3 ring-1 ring-fg/[0.06]">
-              <dt className="flex items-center gap-1 text-[11px] text-muted">
-                <Icon size={12} /> {label}
-              </dt>
-              <dd className={`mt-1 truncate text-base font-semibold sm:text-lg ${bad ? "text-bad" : ""}`}>{value}</dd>
-            </div>
-          ))}
-        </dl>
+      <dl className="grid grid-cols-3 divide-x divide-line border-y border-line">
+        {[
+          { label: "Captain", value: captain, icon: Crown },
+          {
+            label: "Transfers",
+            value: (
+              <>
+                {transfers}
+                {verdict.hitCost > 0 && <span className="ml-1 text-sm text-bad">−{verdict.hitCost}</span>}
+              </>
+            ),
+            icon: ArrowDownUp,
+          },
+          { label: "Bank after", value: `£${verdict.bankAfter.toFixed(1)}m`, icon: Wallet, bad: verdict.bankAfter < 0 },
+        ].map(({ label, value, icon: Icon, bad }) => (
+          <div key={label} className="min-w-0 px-5 py-3.5">
+            <dt className="flex items-center gap-1 text-xs text-muted">
+              <Icon size={12} /> {label}
+            </dt>
+            <dd className={`mt-1 truncate text-lg font-semibold ${bad ? "text-bad" : ""}`}>{value}</dd>
+          </div>
+        ))}
+      </dl>
 
-        <ul className="mt-5 space-y-2.5">
-          {verdict.notes.map((n, i) => (
-            <NoteRow key={n.id} note={n} order={i} />
-          ))}
-          {verdict.notes.length === 0 && (
-            <li className="rounded-xl bg-fg/[0.03] p-4 text-sm text-muted">
-              No red flags from your history. Make a transfer or change your captain to see what TopGaffer remembers.
-            </li>
-          )}
-        </ul>
+      {attention.length > 0 && <RowGroup label="Needs attention">{attention.map(row)}</RowGroup>}
+      {context.length > 0 && <RowGroup label="Good to know">{context.map(row)}</RowGroup>}
+      {verdict.notes.length === 0 && (
+        <p className="px-5 py-5 text-sm text-muted">
+          No red flags from your history. Make a transfer or change your captain to see what TopGaffer remembers.
+        </p>
+      )}
 
+      <div className="mt-auto border-t border-line p-5">
         {locked ? (
-          <div className="mt-6 rounded-xl border border-good/30 bg-good/[0.07] p-4">
+          <div>
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="flex items-center gap-2 font-semibold text-good">
-                <Check size={17} /> Plan locked
+              <p className="flex items-center gap-2 text-sm font-semibold text-good">
+                <Check size={16} /> Plan locked
                 <span className="text-xs font-normal text-muted">
                   {new Date(locked.savedAt).toLocaleString("en-GB", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" })}
                 </span>
@@ -528,7 +569,7 @@ function VerdictPanel({
                 href={locked.sui.explorerUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-3 flex w-fit items-center gap-1.5 rounded-xl bg-fg/5 px-3 py-2 text-xs font-semibold text-text ring-1 ring-fg/10 hover:bg-fg/10"
+                className="mt-3 flex w-fit items-center gap-1.5 rounded-lg bg-fg/[0.05] px-3 py-2 text-xs font-semibold text-text hover:bg-fg/[0.08]"
               >
                 <ShieldCheck size={14} className="text-good" /> Proof on Sui {locked.sui.network}
                 <ExternalLink size={12} className="text-muted" />
@@ -536,14 +577,9 @@ function VerdictPanel({
             ) : (
               <div className="mt-3">
                 <p className="text-xs text-warn">{lockError ?? "Saved on this device, not yet recorded on Sui."}</p>
-                <button
-                  onClick={onRetrySui}
-                  disabled={saving}
-                  className="mt-2 inline-flex items-center gap-2 rounded-xl bg-volt px-3.5 py-2 text-sm font-semibold text-neutral-950 disabled:opacity-50"
-                >
-                  {saving ? <Loader2 size={15} className="animate-spin" /> : <ShieldCheck size={15} />}
+                <Button size="small" onClick={onRetrySui} disabled={saving} leadingIcon={saving ? Spinner : ShieldCheck} className="mt-2">
                   {saving ? "Recording on Sui…" : "Record on Sui now"}
-                </button>
+                </Button>
               </div>
             )}
             <button onClick={() => setShowDetails(!showDetails)} className="mt-3 flex items-center gap-1 text-[11px] text-faint hover:text-muted">
@@ -562,59 +598,12 @@ function VerdictPanel({
             )}
           </div>
         ) : (
-          <Button
-            onClick={onLock}
-            disabled={verdict.level === "blocked" || saving}
-            leadingIcon={saving ? Spinner : Lock}
-            className="mt-6 w-full"
-          >
+          <Button onClick={onLock} disabled={verdict.level === "blocked" || saving} leadingIcon={saving ? Spinner : Lock} className="w-full">
             {saving ? "Locking on Sui…" : verdict.level === "think" ? "Lock it anyway" : "Lock my plan"}
           </Button>
         )}
       </div>
-    </div>
-  );
-}
-
-
-const NOTE_STYLE = {
-  blocker: { icon: ShieldAlert, text: "text-bad", border: "border-l-bad", bg: "bg-bad/[0.08]" },
-  warning: { icon: AlertTriangle, text: "text-warn", border: "border-l-warn", bg: "bg-warn/[0.08]" },
-  info: { icon: Users, text: "text-info", border: "border-l-info", bg: "bg-info/[0.07]" },
-  strength: { icon: CheckCircle2, text: "text-good", border: "border-l-good", bg: "bg-good/[0.07]" },
-} as const;
-
-function NoteRow({ note, order }: { note: Note; order: number }) {
-  const t = NOTE_STYLE[note.tone];
-  const Icon = t.icon;
-  return (
-    <li
-      style={{ animationDelay: `${order * 60}ms` }}
-      className={`flex animate-rise gap-3 rounded-xl border border-l-[3px] border-line p-3.5 ${t.border} ${t.bg}`}
-    >
-      <Icon size={18} className={`mt-0.5 shrink-0 ${t.text}`} />
-      <div className="min-w-0">
-        <p className="text-sm font-semibold">{note.title}</p>
-        {note.people && note.people.length > 0 ? (
-          <div className="mt-1.5 flex flex-wrap gap-1.5">
-            {note.people.map((name) => (
-              <span key={name} className="inline-flex items-center gap-1.5 rounded-full bg-sunken py-0.5 pr-2.5 pl-0.5 text-[11px] ring-1 ring-fg/10">
-                <span className="grid size-5 place-items-center rounded-full bg-[var(--color-series-expert)] text-[9px] font-bold text-white">
-                  {name
-                    .split(" ")
-                    .map((w) => w[0])
-                    .slice(0, 2)
-                    .join("")}
-                </span>
-                {name}
-              </span>
-            ))}
-          </div>
-        ) : (
-          note.because && <p className="mt-0.5 text-xs text-muted">{note.because}</p>
-        )}
-      </div>
-    </li>
+    </Panel>
   );
 }
 

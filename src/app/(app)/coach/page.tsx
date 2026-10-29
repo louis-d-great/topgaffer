@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
-import { Brain, ChevronDown, Loader2, RotateCcw, Send, Sparkles } from "lucide-react";
+import { Brain, CalendarDays, ChevronDown, Lightbulb, Loader2, MessageCircleQuestion, RotateCcw, Send, Sparkles, Users } from "lucide-react";
 import { useManager } from "@/components/app-shell";
+import { ActionRow, Panel } from "@/components/panel";
 import { PageHeader, Skeleton } from "@/components/ui";
 import { useExperts } from "@/lib/experts";
 import { useLocal } from "@/lib/store";
@@ -175,42 +176,33 @@ export default function CoachPage() {
         </section>
 
         <aside className="space-y-5 xl:sticky xl:top-24 xl:col-span-4">
-          <section className="card p-5">
-            <p className="eyebrow">What the coach knows</p>
-            <ul className="mt-4 space-y-3 text-sm">
-              <Fact label="Gameweeks of your history" value={profile.gameweeks.length} />
-              <Fact label="Lessons learned about you" value={profile.lessons.length} />
-              <Fact label="Memories on Walrus" value={memory.saved} />
-              <Fact label="Experts tracked" value={tracked.length} />
+          <Panel title="What the coach knows" subtitle="Every answer is built from this, never invented">
+            <ul className="divide-y divide-line">
+              <ActionRow icon={CalendarDays} title="Your season" subtitle="Every gameweek, captain, transfer and hit" right={<Count n={profile.gameweeks.length} unit="GW" />} />
+              <ActionRow icon={Lightbulb} tone="warning" title="Lessons about you" subtitle="Patterns from your real decisions" right={<Count n={profile.lessons.length} />} href="/memory" />
+              <ActionRow icon={Brain} tone="good" title="Memories on Walrus" subtitle="Recalled by meaning before each answer" right={<Count n={memory.saved} />} href="/memory" />
+              <ActionRow icon={Users} tone="info" title="Experts tracked" subtitle="Their real teams and records" right={<Count n={tracked.length} />} href="/experts" />
             </ul>
-            <p className="mt-4 text-xs text-faint">
-              Every answer is built from your real FPL data. The coach recalls the most relevant memories from Walrus first, and each conversation is saved back to memory.
-            </p>
-          </section>
-          <section className="card p-5">
-            <p className="eyebrow">Good questions to ask</p>
-            <ul className="mt-3 space-y-1.5">
+          </Panel>
+          <Panel title="Good questions to ask" subtitle="Tap one to ask it">
+            <ul className="divide-y divide-line">
               {SUGGESTIONS.map((s) => (
-                <li key={s}>
-                  <button onClick={() => ask(s)} disabled={busy} className="text-left text-sm text-muted hover:text-text disabled:opacity-50">
-                    {s}
-                  </button>
-                </li>
+                <ActionRow key={s} icon={MessageCircleQuestion} title={s} onClick={busy ? undefined : () => ask(s)} />
               ))}
             </ul>
-          </section>
+          </Panel>
         </aside>
       </div>
     </div>
   );
 }
 
-function Fact({ label, value }: { label: string; value: number }) {
+function Count({ n, unit }: { n: number; unit?: string }) {
   return (
-    <li className="flex items-center justify-between">
-      <span className="text-muted">{label}</span>
-      <span className="num font-semibold">{value}</span>
-    </li>
+    <span className="shrink-0 text-base font-semibold">
+      {n}
+      {unit && <span className="ml-0.5 text-xs font-normal text-muted">{unit}</span>}
+    </span>
   );
 }
 

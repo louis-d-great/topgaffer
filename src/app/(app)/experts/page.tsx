@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { ArrowUpRight, Check, Loader2, Search, Trash2, Trophy, UserPlus, X } from "lucide-react";
+import { Check, Crown, Loader2, Medal, Search, Trash2, Trophy, UserPlus, Users, X } from "lucide-react";
 import { useManager } from "@/components/app-shell";
+import { ActionRow, CountBadge, Panel, PanelLink, StatCard } from "@/components/panel";
 import { ErrorCard, PageHeader, Skeleton } from "@/components/ui";
 import { captainHeadToHead, useExperts, type TrackedExpert } from "@/lib/experts";
-import { fmtRank, fmtSigned, pct } from "@/lib/format";
+import { fmtRank, pct } from "@/lib/format";
 import type { ExpertProfile, ManagerProfile } from "@/lib/fpl/types";
 import type { Expert } from "@/lib/store";
 import { Button } from "@/components/base/buttons/button";
@@ -54,6 +55,8 @@ export default function ExpertsPage() {
       ) : experts.tracked.length === 0 ? (
         <EmptyState onAdd={() => setAdding(true)} />
       ) : (
+        <div className="space-y-5">
+          <Summary tracked={experts.tracked} you={profile} />
         <div className="grid items-start gap-5 xl:grid-cols-12">
           <Leaderboard
             tracked={experts.tracked}
@@ -64,6 +67,7 @@ export default function ExpertsPage() {
             onRemove={experts.remove}
           />
           {active && <HeadToHeadPanel tracked={active} you={profile} />}
+        </div>
         </div>
       )}
 
@@ -116,10 +120,13 @@ function Leaderboard({
 }) {
   return (
     <section className="card overflow-hidden xl:col-span-8">
-      <div className="flex items-center justify-between border-b border-line px-5 py-4">
-        <p className="eyebrow">Leaderboard · this season</p>
-        <p className="text-xs text-faint">Click a name for the full dashboard</p>
-      </div>
+      <header className="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
+        <div>
+          <h2 className="text-[15px] font-semibold">Leaderboard</h2>
+          <p className="mt-0.5 text-xs text-muted">This season · select a row to compare captains, or a name for the full dashboard</p>
+        </div>
+        <CountBadge>{tracked.length} experts</CountBadge>
+      </header>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[720px] text-sm">
           <thead>
@@ -227,66 +234,91 @@ function HeadToHeadPanel({ tracked, you }: { tracked: TrackedExpert; you: Manage
   const name = (id: number) => you.players[id]?.name ?? "Unknown";
 
   return (
-    <section className="card p-5 xl:sticky xl:top-24 xl:col-span-4">
-      <div className="flex items-center justify-between gap-3">
-        <p className="eyebrow">Captains: {expert.name} vs you</p>
-        <Link
-          href={`/experts/${expert.teamId}`}
-          className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-volt px-2.5 py-1.5 text-xs font-semibold text-neutral-950"
-        >
-          Full dashboard <ArrowUpRight size={13} />
-        </Link>
-      </div>
-      <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl bg-sunken p-3 text-center">
-        <div>
-          <p className="num text-xl font-semibold text-warn">{h2h.theyWon}</p>
-          <p className="text-[11px] text-muted">their weeks</p>
-        </div>
-        <div>
-          <p className="num text-xl font-semibold">{h2h.weeks - h2h.theyWon - h2h.youWon}</p>
-          <p className="text-[11px] text-muted">level</p>
-        </div>
-        <div>
-          <p className="num text-xl font-semibold text-good">{h2h.youWon}</p>
-          <p className="text-[11px] text-muted">your weeks</p>
-        </div>
-      </div>
-      <p className="mt-3 text-sm text-muted">
+    <Panel
+      className="xl:sticky xl:top-24 xl:col-span-4"
+      title={`Captains: ${expert.name} vs you`}
+      subtitle="Points before the armband, week by week"
+      action={<PanelLink href={`/experts/${expert.teamId}`}>Dashboard</PanelLink>}
+    >
+      <dl className="grid grid-cols-3 divide-x divide-line border-b border-line text-center">
+        {[
+          { label: "Their weeks", value: h2h.theyWon, cls: "text-warn" },
+          { label: "Level", value: h2h.weeks - h2h.theyWon - h2h.youWon, cls: "" },
+          { label: "Your weeks", value: h2h.youWon, cls: "text-good" },
+        ].map((c) => (
+          <div key={c.label} className="py-4">
+            <dd className={`text-2xl font-semibold tracking-tight ${c.cls}`}>{c.value}</dd>
+            <dt className="mt-0.5 text-xs text-muted">{c.label}</dt>
+          </div>
+        ))}
+      </dl>
+      <p className="px-5 pt-4 text-sm text-muted">
         {h2h.margin > 0
           ? `Their captains scored ${h2h.margin} more points than yours this season.`
           : h2h.margin < 0
             ? `Your captains scored ${-h2h.margin} more points than theirs this season.`
             : "Your captains have scored the same as theirs this season."}{" "}
-        Best captain in their own team {pct(profile.stats.captainBestRate)} of weeks.
+        They picked the best captain in their team {pct(profile.stats.captainBestRate)} of weeks.
       </p>
-
-      <ul className="mt-4 space-y-1.5">
+      <ul className="mt-2 divide-y divide-line">
         {rows.map((c) => {
           const mine = yours.get(c.gw);
-          const diff = mine ? c.points - mine.points : null;
+          const diff = mine ? c.points - mine.points : 0;
           return (
-            <li key={c.gw} className="grid grid-cols-[3rem_1fr_1fr] items-center gap-2 rounded-xl bg-fg/[0.03] px-3 py-2 text-xs">
-              <span className="num text-faint">GW{c.gw}</span>
-              <span className={`truncate ${diff !== null && diff > 0 ? "font-semibold text-text" : "text-muted"}`}>
-                {c.name} <span className="num">{c.points}</span>
-              </span>
-              <span className={`truncate text-right ${diff !== null && diff < 0 ? "font-semibold text-text" : "text-muted"}`}>
-                {mine ? (
-                  <>
-                    {name(mine.id)} <span className="num">{mine.points}</span>
-                  </>
-                ) : (
-                  "—"
-                )}
-              </span>
-            </li>
+            <ActionRow
+              key={c.gw}
+              leading={<span className="w-11 shrink-0 text-sm font-semibold text-muted">GW{c.gw}</span>}
+              title={
+                <>
+                  {c.name} <span className="font-normal text-muted">{c.points}</span>
+                </>
+              }
+              subtitle={mine ? `You: ${name(mine.id)} ${mine.points}` : "You: no captain"}
+              right={
+                <span className={`text-xs font-semibold ${diff > 0 ? "text-warn" : diff < 0 ? "text-good" : "text-faint"}`}>
+                  {diff > 0 ? "Theirs" : diff < 0 ? "Yours" : "Level"}
+                </span>
+              }
+            />
           );
         })}
       </ul>
-      <p className="mt-3 text-[11px] text-faint">
-        Points before the armband. Left: {expert.name}. Right: you. Difference this season: {fmtSigned(h2h.margin)}.
-      </p>
-    </section>
+    </Panel>
+  );
+}
+
+/** Where you stand against the experts you follow. */
+function Summary({ tracked, you }: { tracked: TrackedExpert[]; you: ManagerProfile }) {
+  const leader = tracked[0];
+  const position = tracked.filter((t) => t.profile.totalPoints > you.totalPoints).length + 1;
+  const beatYou = tracked.filter((t) => captainHeadToHead(you, t.profile).margin > 0).length;
+  return (
+    <div className="grid grid-cols-2 gap-5 xl:grid-cols-4">
+      <StatCard label="Experts tracked" icon={Users} value={tracked.length} context={{ text: "from their real FPL teams" }} />
+      <StatCard
+        label="Leading expert"
+        icon={Trophy}
+        value={leader.profile.totalPoints}
+        unit="pts"
+        context={{ text: leader.expert.name, tone: "info" }}
+        footer={{ label: "Open dashboard", href: `/experts/${leader.expert.teamId}` }}
+      />
+      <StatCard
+        label="Your position"
+        icon={Medal}
+        value={`${position} of ${tracked.length + 1}`}
+        context={{
+          text: position === 1 ? "Ahead of every expert" : `${leader.profile.totalPoints - you.totalPoints} pts behind ${leader.expert.name}`,
+          tone: position === 1 ? "good" : position <= Math.ceil((tracked.length + 1) / 2) ? "info" : "warning",
+        }}
+      />
+      <StatCard
+        label="Better captains than you"
+        icon={Crown}
+        value={`${beatYou}/${tracked.length}`}
+        context={{ text: beatYou > tracked.length / 2 ? "most experts out-captain you" : "you hold your own on captaincy", tone: beatYou > tracked.length / 2 ? "warning" : "good" }}
+      />
+    </div>
   );
 }
 
