@@ -9,6 +9,8 @@ import { useApi } from "@/lib/use-api";
 import { ThemeToggle } from "./theme-toggle";
 import { useNow } from "@/lib/use-now";
 import { useMemorySync, type MemorySync } from "@/lib/use-memory-sync";
+import type { PlanReview } from "@/lib/plan-review";
+import { usePlanReviews } from "@/lib/use-plan-reviews";
 import { timeUntil } from "@/lib/format";
 import type { ManagerProfile } from "@/lib/fpl/types";
 import { Avatar as BoardAvatar } from "@/components/base/avatar/avatar";
@@ -28,6 +30,8 @@ interface ManagerCtx {
   loading: boolean;
   error: string | null;
   memory: MemorySync;
+  /** Reviews of locked plans whose gameweek has finished, newest first. */
+  reviews: PlanReview[];
 }
 
 const Ctx = createContext<ManagerCtx | null>(null);
@@ -62,6 +66,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { data, loading, error } = useApi<ManagerProfile>(teamId ? `/api/manager/${teamId}` : null);
   const memory = useMemorySync(teamId, data);
+  const reviews = usePlanReviews(teamId, data, memory);
 
   useEffect(() => {
     if (hydrated && !teamId) router.replace("/");
@@ -69,7 +74,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   // The frame always renders, so navigation is instant; screens show skeletons until data arrives.
   return (
-    <Ctx.Provider value={{ teamId, profile: data, loading, error, memory }}>
+    <Ctx.Provider value={{ teamId, profile: data, loading, error, memory, reviews }}>
       <div className="flex min-h-dvh w-full">
         {/* Desktop sidebar */}
         <div className="sticky top-0 hidden h-dvh shrink-0 p-3 pr-0 md:block">

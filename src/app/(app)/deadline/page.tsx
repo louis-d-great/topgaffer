@@ -36,7 +36,7 @@ function DeadlineCheck({ data, profile, teamId }: { data: DeadlineData; profile:
   const gw = data.gw.id;
   const [plans, setPlans] = useLocal<Record<string, LockedPlan>>(KEYS.plans, {});
   const { tracked } = useExperts();
-  const { memory } = useManager();
+  const { memory, reviews } = useManager();
   const locked = plans[gw];
 
   const [captain, setCaptain] = useState(() => locked?.captain ?? data.squad.find((p) => p.isCaptain)?.id ?? data.squad[0].id);
@@ -53,7 +53,7 @@ function DeadlineCheck({ data, profile, teamId }: { data: DeadlineData; profile:
   const byId = useMemo(() => new Map(data.players.map((p) => [p.id, p])), [data.players]);
   const complete = swaps.filter((s): s is { out: number; in: number } => s.in !== null);
   const plan = { captain, outs: complete.map((s) => s.out), ins: complete.map((s) => s.in), freeTransfers: ft };
-  const verdict = judgePlan(plan, data, profile, tracked);
+  const verdict = judgePlan(plan, data, profile, tracked, reviews[0]);
 
   // The squad as it would look after the planned transfers.
   const squad: (SquadPlayer & { incoming: boolean })[] = data.squad.map((p) => {
@@ -93,7 +93,18 @@ function DeadlineCheck({ data, profile, teamId }: { data: DeadlineData; profile:
     setSaving(true);
     const salt = crypto.randomUUID();
     const fp = await fingerprint(teamId, gw, plan, salt);
-    const entry: LockedPlan = { gw, captain, transfersIn: plan.ins, transfersOut: plan.outs, salt, fingerprint: fp, savedAt: new Date().toISOString() };
+    const entry: LockedPlan = {
+      gw,
+      captain,
+      transfersIn: plan.ins,
+      transfersOut: plan.outs,
+      salt,
+      fingerprint: fp,
+      savedAt: new Date().toISOString(),
+      verdict: LEVELS[verdict.level].label,
+      hitCost: verdict.hitCost,
+      warnings: verdict.notes.filter((n) => n.tone === "warning" || n.tone === "blocker").map((n) => ({ id: n.id, title: n.title })),
+    };
     setLockError(null);
     try {
       entry.sui = await recordOnSui(teamId, gw, fp);

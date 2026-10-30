@@ -7,13 +7,14 @@ import { ChartCard, ColumnChart, LineChart, SERIES, Sparkline, compact } from "@
 import { CountUp, ErrorCard, Skeleton, TeamBadge } from "@/components/ui";
 import { fmtDeadline, fmtRank, fmtSigned, pct, timeUntil } from "@/lib/format";
 import type { Lesson, ManagerProfile } from "@/lib/fpl/types";
+import type { PlanReview } from "@/lib/plan-review";
 import { useNow } from "@/lib/use-now";
 
 export default function HomePage() {
-  const { profile, loading, error } = useManager();
+  const { profile, loading, error, reviews } = useManager();
   if (error) return <ErrorCard message={error} onRetry={() => location.reload()} />;
   if (loading || !profile) return <HomeSkeleton />;
-  return <Home profile={profile} />;
+  return <Home profile={profile} lastReview={reviews[0]} />;
 }
 
 /*
@@ -22,7 +23,7 @@ export default function HomePage() {
  *   2. Performance: how the season is going (points lost, trend cards, season chart)
  *   3. Insights: what TopGaffer has learned (lessons, rank journey)
  */
-function Home({ profile }: { profile: ManagerProfile }) {
+function Home({ profile, lastReview }: { profile: ManagerProfile; lastReview?: PlanReview }) {
   const now = useNow();
   const first = profile.managerName.split(" ")[0];
   const gws = profile.gameweeks;
@@ -41,7 +42,7 @@ function Home({ profile }: { profile: ManagerProfile }) {
 
       {/* 1 · Decisions + headline performance */}
       <div className="grid gap-5 xl:grid-cols-12">
-        <FocusPanel profile={profile} topLesson={ranked[0]} now={now} />
+        <FocusPanel profile={profile} topLesson={ranked[0]} lastReview={lastReview} now={now} />
         <PointsLost profile={profile} />
       </div>
 
@@ -145,7 +146,7 @@ function Home({ profile }: { profile: ManagerProfile }) {
 }
 
 /** The featured panel: the next decision, the lesson that matters most for it, and the action. */
-function FocusPanel({ profile, topLesson, now }: { profile: ManagerProfile; topLesson?: Lesson; now: number }) {
+function FocusPanel({ profile, topLesson, lastReview, now }: { profile: ManagerProfile; topLesson?: Lesson; lastReview?: PlanReview; now: number }) {
   const next = profile.nextGw;
   return (
     <section className="relative overflow-hidden rounded-[1.25rem] bg-volt p-6 text-neutral-950 xl:col-span-5">
@@ -161,12 +162,12 @@ function FocusPanel({ profile, topLesson, now }: { profile: ManagerProfile; topL
           <p className="mt-1 text-3xl font-semibold tracking-tight">No upcoming deadline</p>
         )}
 
-        {topLesson && (
+        {(lastReview || topLesson) && (
           <div className="mt-6 rounded-2xl bg-neutral-950/[0.08] p-4">
             <p className="flex items-center gap-1.5 text-xs font-semibold text-neutral-900/70">
-              <Brain size={14} /> Before you decide
+              <Brain size={14} /> {lastReview ? `From your GW${lastReview.gw} plan review` : "Before you decide"}
             </p>
-            <p className="mt-1 text-[15px] leading-snug font-semibold">{topLesson.title}</p>
+            <p className="mt-1 text-[15px] leading-snug font-semibold">{lastReview ? lastReview.lesson : topLesson!.title}</p>
           </div>
         )}
 

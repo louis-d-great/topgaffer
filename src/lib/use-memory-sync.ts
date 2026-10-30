@@ -124,6 +124,28 @@ export function useMemorySync(teamId: number | null, profile: ManagerProfile | n
     [teamId, merge],
   );
 
+  /** Writes a one-off note (e.g. a plan review) once; the ledger stops it being written twice. */
+  const pendingNotes = useRef(new Set<string>());
+  const rememberNote = useCallback(
+    async (key: string, label: string, text: string) => {
+      if (!teamId || ledgerRef.current[key] || pendingNotes.current.has(key)) return;
+      pendingNotes.current.add(key);
+      try {
+        const res = await fetch(`/api/memory/${teamId}/note`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ key, label, text }),
+        });
+        const body = await res.json();
+        if (!res.ok || !body.jobId) throw new Error(body.error ?? "Couldn't save the note to memory");
+        merge({ [key]: { jobId: body.jobId, status: "pending", blobId: null, text: `[TopGaffer · ${label}] ${text}` } });
+      } finally {
+        pendingNotes.current.delete(key);
+      }
+    },
+    [teamId, merge],
+  );
+
   const all = Object.values(ledger);
   return {
     ledger,
@@ -132,6 +154,7 @@ export function useMemorySync(teamId: number | null, profile: ManagerProfile | n
     saved: all.filter((m) => DONE.has(m.status)).length,
     pending: all.filter((m) => !DONE.has(m.status) && !DEAD.has(m.status)).length,
     rememberPlan,
+    rememberNote,
   };
 }
 

@@ -1,4 +1,5 @@
 import { captainHeadToHead, type TrackedExpert } from "./experts";
+import type { PlanReview } from "./plan-review";
 import type { DeadlineData, LessonTone, ManagerProfile, Player } from "./fpl/types";
 
 export interface Plan {
@@ -36,6 +37,7 @@ export function judgePlan(
   deadline: DeadlineData,
   profile: ManagerProfile,
   experts: TrackedExpert[],
+  lastReview?: PlanReview,
 ): Verdict {
   const byId = new Map<number, Player>(deadline.players.map((p) => [p.id, p]));
   const notes: Note[] = [];
@@ -156,6 +158,16 @@ export function judgePlan(
         because: `+${best.h2h.margin} captain pts over you this season. Their recent captains: ${recent.map((c) => `${c.name} (GW${c.gw})`).join(", ")}.`,
       });
     }
+  }
+
+  // What happened last time you locked a plan: the memory loop closing.
+  if (lastReview) {
+    notes.push({
+      id: "last-review",
+      tone: lastReview.tone === "warning" ? "warning" : lastReview.tone === "strength" ? "strength" : "info",
+      title: lastReview.tone === "warning" ? `In GW${lastReview.gw} you ignored a warning, and it was right` : `What your GW${lastReview.gw} plan review found`,
+      because: lastReview.lesson,
+    });
   }
 
   const captaincy = lesson("captaincy");

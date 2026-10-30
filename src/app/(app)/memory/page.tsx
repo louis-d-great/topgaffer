@@ -22,7 +22,7 @@ const FILTERS: { key: "all" | LessonTone; label: string }[] = [
 ];
 
 export default function MemoryPage() {
-  const { teamId, profile, error, memory } = useManager();
+  const { teamId, profile, error, memory, reviews } = useManager();
   const [dismissed, setDismissed] = useLocal<string[]>(KEYS.dismissed, []);
   const [plans] = useLocal<Record<string, LockedPlan>>(KEYS.plans, {});
   const [filter, setFilter] = useState<"all" | LessonTone>("all");
@@ -133,14 +133,17 @@ export default function MemoryPage() {
           </ul>
         </Panel>
 
-        <Panel className="xl:col-span-4" title="Locked plans" subtitle="Fingerprints frozen on Sui" action={<PanelLink href="/deadline">Deadline</PanelLink>}>
+        <Panel className="xl:col-span-4" title="Locked plans" subtitle="Reviewed after each gameweek · proofs on Sui" action={<PanelLink href="/deadline">Deadline</PanelLink>}>
           <ul className="divide-y divide-line">
             {locks.map((p) => (
               <ActionRow
                 key={p.gw}
                 leading={<span className="w-11 shrink-0 text-sm font-semibold text-volt-text">GW{p.gw}</span>}
                 title={`Captain ${name(p.captain)}`}
-                subtitle={p.transfersIn.length > 0 ? `In: ${p.transfersIn.map(name).join(", ")}` : "No transfers"}
+                subtitle={
+                  reviews.find((r) => r.gw === p.gw)?.lesson ??
+                  (p.transfersIn.length > 0 ? `In: ${p.transfersIn.map(name).join(", ")}` : "No transfers · review after the gameweek")
+                }
                 right={
                   p.sui ? (
                     <a href={p.sui.explorerUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-good hover:underline">

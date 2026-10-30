@@ -96,4 +96,8 @@ export interface LockedPlan {
   savedAt: string;
   /** Set once the fingerprint is recorded (and frozen) on Sui. */
   sui?: { digest: string; network: string; explorerUrl: string };
+  /** What the deadline check said when the plan was locked, so the review can judge it after the gameweek. */
+  verdict?: string;
+  hitCost?: number;
+  warnings?: { id: string; title: string }[];
 }
