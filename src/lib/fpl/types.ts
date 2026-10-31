@@ -183,3 +183,18 @@ export interface DeadlineData {
   estimatedFreeTransfers: number;
   players: (Player & { fixture: SquadPlayer["fixture"] })[];
 }
+
+/** Where an expert comes from: today's leaderboard, a long track record, or a following. */
+export type ExpertGroup = "top" | "proven" | "creator";
+
+/** A manager in one of the expert groups, before anyone follows them. */
+export interface GroupManager {
+  teamId: number;
+  teamName: string;
+  managerName: string;
+  rank: number | null;
+  points: number;
+  /** Proven managers: their last five finished seasons. */
+  seasons?: { season: string; rank: number }[];
+  topFinishes?: number;
+}

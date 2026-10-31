@@ -222,3 +222,19 @@ export async function getPicks(id: number, gw: number) {
   cacheLife("hours");
   return get<RawPicks>(`/entry/${id}/event/${gw}/picks/`);
 }
+
+export interface RawStanding {
+  entry: number;
+  entry_name: string;
+  player_name: string;
+  rank: number;
+  total: number;
+}
+
+/** One page (50 managers) of FPL's overall league: everyone who plays, ranked. */
+export async function getOverallStandings(page: number) {
+  "use cache";
+  cacheLife("hours");
+  const d = await get<{ standings: { results: RawStanding[] } }>(`/leagues-classic/314/standings/?page_standings=${page}`);
+  return d.standings.results;
+}

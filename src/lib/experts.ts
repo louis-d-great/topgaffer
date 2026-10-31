@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import type { ExpertProfile, ManagerProfile } from "./fpl/types";
+import proven from "@/data/proven-managers.json";
+import type { ExpertGroup, ExpertProfile, GroupManager, ManagerProfile } from "./fpl/types";
 import { KEYS, useLocal, type Expert } from "./store";
 import { useApi } from "./use-api";
 
@@ -12,13 +13,36 @@ import { useApi } from "./use-api";
  */
 export const FEATURED_EXPERTS: Expert[] = [
   // Verified 2026-10-27: the FPL entry's own manager/team name matches the creator.
-  { teamId: 3054, name: "FPL Harry", handle: "Harry Daniels", platform: "youtube", country: "GB" },
-  { teamId: 41, name: "Let's Talk FPL", handle: "Andy", platform: "youtube", country: "IE" },
-  { teamId: 120, name: "FPL Mate", handle: "Dan", platform: "youtube", country: "GB" },
-  { teamId: 199, name: "FPL Raptor", handle: "Eggspected Goals", platform: "x", country: "GB" },
-  { teamId: 246, name: "FPL BlackBox", handle: "Az Phillips", platform: "other", country: "GB" },
-  { teamId: 53517, name: "Ben Crellin", handle: "Fixture ticker", platform: "x", country: "GB" },
+  { teamId: 3054, name: "FPL Harry", handle: "Harry Daniels", platform: "youtube", country: "GB", group: "creator" },
+  { teamId: 41, name: "Let's Talk FPL", handle: "Andy", platform: "youtube", country: "IE", group: "creator" },
+  { teamId: 120, name: "FPL Mate", handle: "Dan", platform: "youtube", country: "GB", group: "creator" },
+  { teamId: 199, name: "FPL Raptor", handle: "Eggspected Goals", platform: "x", country: "GB", group: "creator" },
+  { teamId: 246, name: "FPL BlackBox", handle: "Az Phillips", platform: "other", country: "GB", group: "creator" },
+  { teamId: 53517, name: "Ben Crellin", handle: "Fixture ticker", platform: "x", country: "GB", group: "creator" },
 ];
+
+/** A manager from one of the data-driven groups, as an expert you can follow. */
+export function expertFromManager(m: GroupManager, group: Exclude<ExpertGroup, "creator">): Expert {
+  return { teamId: m.teamId, name: m.managerName, handle: m.teamName, platform: "fpl", country: "XX", group, topFinishes: m.topFinishes };
+}
+
+/** The three strongest proven managers are followed from the start, so the leaderboard holds real elite managers too. */
+export const DEFAULT_PROVEN: Expert[] = proven.managers
+  .slice(0, 3)
+  .map((m) => expertFromManager({ ...m, rank: null, points: 0 }, "proven"));
+
+/** One honest line on why someone is in the list. */
+export function expertLabel(e: Expert) {
+  if (e.group === "proven") return `Proven · top 100k in ${e.topFinishes ?? 3} of last 5 seasons`;
+  if (e.group === "top") return "Top 50 this season";
+  const where = e.platform === "youtube" ? "YouTube" : e.platform === "x" ? "X" : "Web";
+  return `Creator · ${where}${e.country !== "XX" ? ` · ${e.country}` : ""}`;
+}
+
+/** Managers in a data-driven group, with their live rank. */
+export function useGroup(group: Exclude<ExpertGroup, "creator"> | null) {
+  return useApi<{ managers: GroupManager[] }>(group ? `/api/experts/groups?group=${group}` : null);
+}
 
 export interface TrackedExpert {
   expert: Expert;
@@ -31,8 +55,9 @@ export function useExperts() {
   // Entries from the earlier manual-logging version have no team ID; ignore them.
   const custom = useMemo(() => mine.filter((e) => Number.isInteger(e.teamId)), [mine]);
   const all = useMemo(() => {
-    const ids = new Set(FEATURED_EXPERTS.map((e) => e.teamId));
-    return [...FEATURED_EXPERTS, ...custom.filter((e) => !ids.has(e.teamId))];
+    const base = [...FEATURED_EXPERTS, ...DEFAULT_PROVEN];
+    const ids = new Set(base.map((e) => e.teamId));
+    return [...base, ...custom.filter((e) => !ids.has(e.teamId))];
   }, [custom]);
 
   const ids = all.map((e) => e.teamId).join(",");
@@ -56,6 +81,7 @@ export function useExperts() {
     add: (e: Expert) => setMine([...custom.filter((x) => x.teamId !== e.teamId), e]),
     remove: (teamId: number) => setMine(custom.filter((x) => x.teamId !== teamId)),
     isCustom: (teamId: number) => custom.some((x) => x.teamId === teamId),
+    isFollowing: (teamId: number) => all.some((x) => x.teamId === teamId),
   };
 }
 

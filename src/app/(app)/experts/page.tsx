@@ -6,9 +6,10 @@ import { Check, Crown, Loader2, Medal, Search, Trash2, Trophy, UserPlus, Users, 
 import { useManager } from "@/components/app-shell";
 import { ActionRow, CountBadge, Panel, PanelLink, StatCard } from "@/components/panel";
 import { ErrorCard, PageHeader, Skeleton } from "@/components/ui";
-import { captainHeadToHead, useExperts, type TrackedExpert } from "@/lib/experts";
+import { FEATURED_EXPERTS, captainHeadToHead, expertFromManager, expertLabel, useExperts, useGroup, type TrackedExpert } from "@/lib/experts";
+import { SegmentedControl, SegmentedControlItem } from "@/components/base/segmented-control/segmented-control";
 import { fmtRank, pct } from "@/lib/format";
-import type { ExpertProfile, ManagerProfile } from "@/lib/fpl/types";
+import type { ExpertGroup, ExpertProfile, GroupManager, ManagerProfile } from "@/lib/fpl/types";
 import type { Expert } from "@/lib/store";
 import { Button } from "@/components/base/buttons/button";
 import { Chip } from "@/components/base/badges/chip";
@@ -41,7 +42,7 @@ export default function ExpertsPage() {
 
   return (
     <div className="stagger">
-      <PageHeader eyebrow="Tracked from their real FPL teams · updates every gameweek" title="Expert tracker">
+      <PageHeader eyebrow="Real FPL teams · proven managers, the top 50 and creators" title="Expert tracker">
         <Button onClick={() => setAdding(true)} leadingIcon={UserPlus}>
           Add expert
         </Button>
@@ -68,6 +69,16 @@ export default function ExpertsPage() {
           />
           {active && <HeadToHeadPanel tracked={active} you={profile} />}
         </div>
+          <FindExperts
+            isFollowing={experts.isFollowing}
+            isCustom={experts.isCustom}
+            onFollow={(e) => {
+              experts.add(e);
+              setSelected(e.teamId);
+            }}
+            onUnfollow={experts.remove}
+            onAddCreator={() => setAdding(true)}
+          />
         </div>
       )}
 
@@ -207,9 +218,7 @@ function Leaderboard({
 function ExpertName({ expert, profile }: { expert: Expert; profile: ExpertProfile }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="num grid size-8 shrink-0 place-items-center rounded-lg bg-fg/[0.06] text-[10px] font-semibold text-muted ring-1 ring-line">
-        {expert.country === "XX" ? "··" : expert.country}
-      </span>
+      <GroupBadge expert={expert} />
       <div className="min-w-0">
         <Link
           href={`/experts/${expert.teamId}`}
@@ -219,7 +228,7 @@ function ExpertName({ expert, profile }: { expert: Expert; profile: ExpertProfil
           {expert.name}
         </Link>
         <p className="truncate text-xs text-muted">
-          {expert.handle} · {expert.platform === "x" ? "X" : expert.platform === "youtube" ? "YouTube" : "Web"} · {profile.teamName}
+          {expertLabel(expert)} · {profile.teamName}
         </p>
       </div>
     </div>
@@ -355,14 +364,14 @@ function AddExpert({ onClose, onSave }: { onClose: () => void; onSave: (e: Exper
 
   function save() {
     if (!found || !name.trim()) return;
-    onSave({ teamId: found.teamId, name: name.trim(), handle: handle.trim() || "—", platform, country });
+    onSave({ teamId: found.teamId, name: name.trim(), handle: handle.trim() || "—", platform, country, group: "creator" });
   }
 
   return (
     <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} className="card w-full max-w-md animate-rise rounded-b-none p-5 sm:rounded-b-[1.25rem]">
         <div className="mb-4 flex items-center justify-between">
-          <p className="text-base font-semibold">Add an expert</p>
+          <p className="text-base font-semibold">Add a creator</p>
           <button onClick={onClose} className="rounded-full p-2 text-muted hover:bg-fg/5" aria-label="Close">
             <X size={18} />
           </button>
@@ -427,5 +436,180 @@ function AddExpert({ onClose, onSave }: { onClose: () => void; onSave: (e: Exper
         )}
       </div>
     </div>
+  );
+}
+
+function GroupBadge({ expert }: { expert: Expert }) {
+  const base = "grid size-8 shrink-0 place-items-center rounded-lg ring-1";
+  if (expert.group === "proven")
+    return (
+      <span className={`${base} bg-volt/10 text-volt-text ring-volt/30`} title="Proven manager">
+        <Medal size={15} />
+      </span>
+    );
+  if (expert.group === "top")
+    return (
+      <span className={`${base} bg-info/10 text-info ring-info/30`} title="Top 50 this season">
+        <Trophy size={15} />
+      </span>
+    );
+  return (
+    <span className={`num ${base} bg-fg/[0.06] text-[10px] font-semibold text-muted ring-line`} title="Creator">
+      {expert.country === "XX" ? "··" : expert.country}
+    </span>
+  );
+}
+
+const GROUPS: { key: ExpertGroup; label: string; blurb: string }[] = [
+  {
+    key: "proven",
+    label: "Proven",
+    blurb: "In today's top 1,000 and inside the top 100k in at least 3 of their last 5 seasons: good now, and for years.",
+  },
+  { key: "top", label: "Top 50 now", blurb: "The 50 best-ranked managers in the world this season, live from FPL. Some are on a first-season hot streak." },
+  { key: "creator", label: "Creators", blurb: "The FPL voices people already follow, always shown with their real rank, so you can see whose advice is working." },
+];
+
+/** Browse the three groups and follow managers into your leaderboard. */
+function FindExperts({
+  isFollowing,
+  isCustom,
+  onFollow,
+  onUnfollow,
+  onAddCreator,
+}: {
+  isFollowing: (id: number) => boolean;
+  isCustom: (id: number) => boolean;
+  onFollow: (e: Expert) => void;
+  onUnfollow: (id: number) => void;
+  onAddCreator: () => void;
+}) {
+  const [group, setGroup] = useState<ExpertGroup>("proven");
+  const { data, loading, error } = useGroup(group === "creator" ? null : group);
+  const info = GROUPS.find((g) => g.key === group)!;
+
+  return (
+    <Panel title="Find experts" subtitle="Follow anyone here and they join your leaderboard">
+      <div className="border-b border-line px-5 py-3">
+        <SegmentedControl aria-label="Expert group" selectedKeys={[group]} onSelectionChange={(k) => setGroup([...k][0] as ExpertGroup)}>
+          {GROUPS.map((g) => (
+            <SegmentedControlItem key={g.key} id={g.key}>
+              {g.label}
+            </SegmentedControlItem>
+          ))}
+        </SegmentedControl>
+        <p className="mt-2.5 text-xs leading-relaxed text-muted">{info.blurb}</p>
+      </div>
+      {group === "creator" ? (
+        <div className="p-5">
+          <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {FEATURED_EXPERTS.map((e) => (
+              <li key={e.teamId} className="flex items-center gap-3 rounded-2xl bg-fg/[0.03] p-3 ring-1 ring-line">
+                <GroupBadge expert={e} />
+                <div className="min-w-0 flex-1">
+                  <Link href={`/experts/${e.teamId}`} className="block truncate text-sm font-semibold hover:underline">
+                    {e.name}
+                  </Link>
+                  <p className="truncate text-xs text-muted">{expertLabel(e)}</p>
+                </div>
+                <span className="shrink-0 text-xs text-faint">Following</span>
+              </li>
+            ))}
+          </ul>
+          <button
+            onClick={onAddCreator}
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-fg/[0.06] px-4 py-2.5 text-sm font-semibold transition hover:bg-fg/10"
+          >
+            <UserPlus size={16} /> Add a creator by team ID
+          </button>
+          <p className="mt-2 text-xs text-faint">Know a creator from Nigeria, the US or anywhere else? Their FPL team ID is all TopGaffer needs.</p>
+        </div>
+      ) : error ? (
+        <p className="p-5 text-sm text-bad">{error}</p>
+      ) : loading || !data ? (
+        <div className="space-y-2 p-5">
+          {Array.from({ length: 5 }, (_, i) => (
+            <Skeleton key={i} className="h-14" />
+          ))}
+        </div>
+      ) : (
+        <ul className="grid max-h-[34rem] grid-cols-1 divide-y divide-line overflow-y-auto lg:grid-cols-2 lg:divide-y-0">
+          {data.managers.map((m, i) => (
+            <GroupRow
+              key={m.teamId}
+              m={m}
+              n={i + 1}
+              following={isFollowing(m.teamId)}
+              removable={isCustom(m.teamId)}
+              onFollow={() => onFollow(expertFromManager(m, group as "top" | "proven"))}
+              onUnfollow={() => onUnfollow(m.teamId)}
+            />
+          ))}
+        </ul>
+      )}
+    </Panel>
+  );
+}
+
+function GroupRow({
+  m,
+  n,
+  following,
+  removable,
+  onFollow,
+  onUnfollow,
+}: {
+  m: GroupManager;
+  n: number;
+  following: boolean;
+  removable: boolean;
+  onFollow: () => void;
+  onUnfollow: () => void;
+}) {
+  return (
+    <li className="flex min-w-0 items-center gap-3 border-line px-5 py-3 lg:border-b">
+      <span className="num w-6 shrink-0 text-sm font-medium text-faint">{n}</span>
+      <div className="min-w-0 flex-1">
+        <Link href={`/experts/${m.teamId}`} className="block truncate text-sm font-semibold hover:underline">
+          {m.managerName}
+        </Link>
+        <p className="truncate text-xs text-muted">
+          {m.teamName} · <span className="num">{m.points}</span> pts · rank <span className="num">{fmtRank(m.rank)}</span>
+        </p>
+        {m.seasons && (
+          <div className="mt-1.5 flex flex-wrap gap-1">
+            {m.seasons.map((s) => (
+              <span
+                key={s.season}
+                title={`${s.season}: finished ${s.rank.toLocaleString()}`}
+                className={`num rounded-md px-1.5 py-0.5 text-[10px] font-medium ${s.rank <= 100_000 ? "bg-volt/10 text-volt-text" : "bg-fg/[0.05] text-faint"}`}
+              >
+                {s.season.slice(2)} · {fmtRank(s.rank)}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+      {following ? (
+        removable ? (
+          <button
+            onClick={onUnfollow}
+            title="Unfollow"
+            className="inline-flex shrink-0 items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-muted ring-1 ring-line transition hover:text-bad"
+          >
+            <Check size={13} /> Following
+          </button>
+        ) : (
+          <span className="shrink-0 px-3 text-xs text-faint">Following</span>
+        )
+      ) : (
+        <button
+          onClick={onFollow}
+          className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-volt px-3 py-1.5 text-xs font-semibold text-neutral-950 transition hover:brightness-105"
+        >
+          <UserPlus size={13} /> Follow
+        </button>
+      )}
+    </li>
   );
 }

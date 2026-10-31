@@ -6,9 +6,10 @@ import { ArrowLeft, ArrowRight, Crown, Lightbulb, ShieldCheck } from "@/componen
 import { useManager } from "@/components/app-shell";
 import { BarList, ChartCard, ColumnChart, CompareMeter, LineChart, SERIES, compact } from "@/components/charts";
 import { ErrorCard, Skeleton, TeamBadge } from "@/components/ui";
-import { FEATURED_EXPERTS, captainHeadToHead, useExperts } from "@/lib/experts";
+import { FEATURED_EXPERTS, captainHeadToHead, expertLabel, useExperts } from "@/lib/experts";
 import { fmtRank, fmtSigned, pct } from "@/lib/format";
 import type { ExpertDetail, ManagerProfile, Position } from "@/lib/fpl/types";
+import type { Expert } from "@/lib/store";
 import { useApi } from "@/lib/use-api";
 
 const CHIP_NAMES: Record<string, string> = { bboost: "Bench Boost", "3xc": "Triple Captain", wildcard: "Wildcard", freehit: "Free Hit", manager: "Assistant Manager" };
@@ -42,7 +43,7 @@ function Dashboard({
   you: ManagerProfile;
   yourDetail: ExpertDetail | null;
   name: string;
-  meta?: { handle: string; platform: string; country: string };
+  meta?: Expert;
 }) {
   const labels = d.gameweeks.map((g) => `GW${g.gw}`);
   const yourByGw = new Map(you.gameweeks.map((g) => [g.gw, g]));
@@ -78,7 +79,7 @@ function Dashboard({
           </div>
           <div className="min-w-0 flex-1">
             <p className="eyebrow">
-              {meta ? `${meta.platform === "youtube" ? "YouTube" : meta.platform === "x" ? "X" : "Creator"} · ${meta.country}` : "Tracked manager"} · FPL team {d.teamId}
+              {meta ? expertLabel(meta) : "Tracked manager"} · FPL team {d.teamId}
             </p>
             <h1 className="mt-0.5 text-2xl font-semibold tracking-tight">{name}</h1>
             <p className="mt-1 text-sm text-muted">

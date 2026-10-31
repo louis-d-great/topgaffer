@@ -1,0 +1,1127 @@
+{
+  "builtAt": "2026-10-31T08:10:28.528Z",
+  "rule": {
+    "pool": 1000,
+    "top": 100000,
+    "minSeasons": 3,
+    "of": 5
+  },
+  "managers": [
+    {
+      "teamId": 4904511,
+      "teamName": "AHH FC",
+      "managerName": "Hui Hao Ang",
+      "topFinishes": 5,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 58386
+        },
+        {
+          "season": "2022/23",
+          "rank": 54285
+        },
+        {
+          "season": "2023/24",
+          "rank": 64634
+        },
+        {
+          "season": "2024/25",
+          "rank": 4685
+        },
+        {
+          "season": "2025/26",
+          "rank": 10584
+        }
+      ]
+    },
+    {
+      "teamId": 2026242,
+      "teamName": "Crispycalimari",
+      "managerName": "Tan Li Xuan Calista",
+      "topFinishes": 5,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 71766
+        },
+        {
+          "season": "2022/23",
+          "rank": 64983
+        },
+        {
+          "season": "2023/24",
+          "rank": 60419
+        },
+        {
+          "season": "2024/25",
+          "rank": 4364
+        },
+        {
+          "season": "2025/26",
+          "rank": 31262
+        }
+      ]
+    },
+    {
+      "teamId": 123623,
+      "teamName": "Apoca's Tricky Reds",
+      "managerName": "Aaron Emberson",
+      "topFinishes": 5,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 85357
+        },
+        {
+          "season": "2022/23",
+          "rank": 33168
+        },
+        {
+          "season": "2023/24",
+          "rank": 9405
+        },
+        {
+          "season": "2024/25",
+          "rank": 95122
+        },
+        {
+          "season": "2025/26",
+          "rank": 76375
+        }
+      ]
+    },
+    {
+      "teamId": 2892935,
+      "teamName": "Tikki Tacos",
+      "managerName": "Adam Goonetilleke",
+      "topFinishes": 5,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 71078
+        },
+        {
+          "season": "2022/23",
+          "rank": 68470
+        },
+        {
+          "season": "2023/24",
+          "rank": 35769
+        },
+        {
+          "season": "2024/25",
+          "rank": 84683
+        },
+        {
+          "season": "2025/26",
+          "rank": 68171
+        }
+      ]
+    },
+    {
+      "teamId": 662,
+      "teamName": "Pitch Invaders",
+      "managerName": "Dominic Lapadula",
+      "topFinishes": 4,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 28638
+        },
+        {
+          "season": "2022/23",
+          "rank": 57425
+        },
+        {
+          "season": "2023/24",
+          "rank": 21192
+        },
+        {
+          "season": "2024/25",
+          "rank": 19497
+        },
+        {
+          "season": "2025/26",
+          "rank": 109888
+        }
+      ]
+    },
+    {
+      "teamId": 5809,
+      "teamName": "Lavia en rose",
+      "managerName": "Jamie Atiyah",
+      "topFinishes": 4,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 3685
+        },
+        {
+          "season": "2022/23",
+          "rank": 25438
+        },
+        {
+          "season": "2023/24",
+          "rank": 10808
+        },
+        {
+          "season": "2024/25",
+          "rank": 93525
+        },
+        {
+          "season": "2025/26",
+          "rank": 238178
+        }
+      ]
+    },
+    {
+      "teamId": 21002,
+      "teamName": "Savage FC",
+      "managerName": "Daryl Savage",
+      "topFinishes": 4,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 74445
+        },
+        {
+          "season": "2022/23",
+          "rank": 92942
+        },
+        {
+          "season": "2023/24",
+          "rank": 11722
+        },
+        {
+          "season": "2024/25",
+          "rank": 155457
+        },
+        {
+          "season": "2025/26",
+          "rank": 37444
+        }
+      ]
+    },
+    {
+      "teamId": 2455750,
+      "teamName": "Declan O'Rice",
+      "managerName": "Brendan Cotter",
+      "topFinishes": 4,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 8697
+        },
+        {
+          "season": "2022/23",
+          "rank": 3235
+        },
+        {
+          "season": "2023/24",
+          "rank": 297154
+        },
+        {
+          "season": "2024/25",
+          "rank": 19497
+        },
+        {
+          "season": "2025/26",
+          "rank": 80609
+        }
+      ]
+    },
+    {
+      "teamId": 10249,
+      "teamName": "Roll the Dyche",
+      "managerName": "Dylan Fourie",
+      "topFinishes": 4,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 51533
+        },
+        {
+          "season": "2022/23",
+          "rank": 55966
+        },
+        {
+          "season": "2023/24",
+          "rank": 74455
+        },
+        {
+          "season": "2024/25",
+          "rank": 95819
+        },
+        {
+          "season": "2025/26",
+          "rank": 169059
+        }
+      ]
+    },
+    {
+      "teamId": 3395014,
+      "teamName": "FC Copenbadly",
+      "managerName": "Richard Gregson",
+      "topFinishes": 4,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 93151
+        },
+        {
+          "season": "2022/23",
+          "rank": 48625
+        },
+        {
+          "season": "2023/24",
+          "rank": 334031
+        },
+        {
+          "season": "2024/25",
+          "rank": 98157
+        },
+        {
+          "season": "2025/26",
+          "rank": 23151
+        }
+      ]
+    },
+    {
+      "teamId": 1844444,
+      "teamName": "Pumped Up Tyre Kicks",
+      "managerName": "George Mulvey",
+      "topFinishes": 4,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 20155
+        },
+        {
+          "season": "2022/23",
+          "rank": 79605
+        },
+        {
+          "season": "2023/24",
+          "rank": 5227
+        },
+        {
+          "season": "2024/25",
+          "rank": 38810
+        },
+        {
+          "season": "2025/26",
+          "rank": 585764
+        }
+      ]
+    },
+    {
+      "teamId": 338945,
+      "teamName": "KJØH",
+      "managerName": "Stian Herseth",
+      "topFinishes": 4,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 5146
+        },
+        {
+          "season": "2022/23",
+          "rank": 670224
+        },
+        {
+          "season": "2023/24",
+          "rank": 45145
+        },
+        {
+          "season": "2024/25",
+          "rank": 33088
+        },
+        {
+          "season": "2025/26",
+          "rank": 40485
+        }
+      ]
+    },
+    {
+      "teamId": 3541755,
+      "teamName": "Famous Last Wirtz",
+      "managerName": "Adam Ross",
+      "topFinishes": 4,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 30370
+        },
+        {
+          "season": "2022/23",
+          "rank": 604234
+        },
+        {
+          "season": "2023/24",
+          "rank": 91185
+        },
+        {
+          "season": "2024/25",
+          "rank": 55974
+        },
+        {
+          "season": "2025/26",
+          "rank": 21518
+        }
+      ]
+    },
+    {
+      "teamId": 1020598,
+      "teamName": "The Peacocks",
+      "managerName": "Ronny Larsen",
+      "topFinishes": 4,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 26399
+        },
+        {
+          "season": "2022/23",
+          "rank": 69786
+        },
+        {
+          "season": "2023/24",
+          "rank": 94582
+        },
+        {
+          "season": "2024/25",
+          "rank": 773726
+        },
+        {
+          "season": "2025/26",
+          "rank": 52759
+        }
+      ]
+    },
+    {
+      "teamId": 5033221,
+      "teamName": "Just better Griff!",
+      "managerName": "Joe Finnerty",
+      "topFinishes": 4,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 62156
+        },
+        {
+          "season": "2022/23",
+          "rank": 20577
+        },
+        {
+          "season": "2023/24",
+          "rank": 56272
+        },
+        {
+          "season": "2024/25",
+          "rank": 923166
+        },
+        {
+          "season": "2025/26",
+          "rank": 83506
+        }
+      ]
+    },
+    {
+      "teamId": 54837,
+      "teamName": "Michael's Team",
+      "managerName": "Michael Roberts",
+      "topFinishes": 4,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 3434568
+        },
+        {
+          "season": "2022/23",
+          "rank": 55902
+        },
+        {
+          "season": "2023/24",
+          "rank": 591
+        },
+        {
+          "season": "2024/25",
+          "rank": 6628
+        },
+        {
+          "season": "2025/26",
+          "rank": 52470
+        }
+      ]
+    },
+    {
+      "teamId": 17673,
+      "teamName": "Lavia and Leave Ya",
+      "managerName": "Jack Willington",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 31542
+        },
+        {
+          "season": "2022/23",
+          "rank": 145051
+        },
+        {
+          "season": "2023/24",
+          "rank": 11292
+        },
+        {
+          "season": "2024/25",
+          "rank": 17118
+        },
+        {
+          "season": "2025/26",
+          "rank": 119680
+        }
+      ]
+    },
+    {
+      "teamId": 2325249,
+      "teamName": "Graham's Team",
+      "managerName": "Graham Watson",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2022/23",
+          "rank": 78836
+        },
+        {
+          "season": "2023/24",
+          "rank": 32109
+        },
+        {
+          "season": "2024/25",
+          "rank": 99015
+        },
+        {
+          "season": "2025/26",
+          "rank": 103833
+        }
+      ]
+    },
+    {
+      "teamId": 12632,
+      "teamName": "Rahh FC",
+      "managerName": "Saif Rahman",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 157610
+        },
+        {
+          "season": "2022/23",
+          "rank": 11231
+        },
+        {
+          "season": "2023/24",
+          "rank": 653
+        },
+        {
+          "season": "2024/25",
+          "rank": 40733
+        },
+        {
+          "season": "2025/26",
+          "rank": 202976
+        }
+      ]
+    },
+    {
+      "teamId": 7170573,
+      "teamName": "Salman's",
+      "managerName": "Mohammed Salman",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 72517
+        },
+        {
+          "season": "2022/23",
+          "rank": 90712
+        },
+        {
+          "season": "2023/24",
+          "rank": 111906
+        },
+        {
+          "season": "2024/25",
+          "rank": 48456
+        },
+        {
+          "season": "2025/26",
+          "rank": 154505
+        }
+      ]
+    },
+    {
+      "teamId": 245325,
+      "teamName": "Wheaton Terriers",
+      "managerName": "Tom Wheaton",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 107359
+        },
+        {
+          "season": "2022/23",
+          "rank": 4752
+        },
+        {
+          "season": "2023/24",
+          "rank": 19602
+        },
+        {
+          "season": "2024/25",
+          "rank": 97832
+        },
+        {
+          "season": "2025/26",
+          "rank": 288077
+        }
+      ]
+    },
+    {
+      "teamId": 22583,
+      "teamName": "Castore Andre Flo",
+      "managerName": "Davie Wilson",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 283797
+        },
+        {
+          "season": "2022/23",
+          "rank": 83404
+        },
+        {
+          "season": "2023/24",
+          "rank": 9252
+        },
+        {
+          "season": "2024/25",
+          "rank": 19758
+        },
+        {
+          "season": "2025/26",
+          "rank": 156096
+        }
+      ]
+    },
+    {
+      "teamId": 1165052,
+      "teamName": "Deno What I’m Doing!",
+      "managerName": "James Munn",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 32821
+        },
+        {
+          "season": "2022/23",
+          "rank": 14826
+        },
+        {
+          "season": "2023/24",
+          "rank": 271494
+        },
+        {
+          "season": "2024/25",
+          "rank": 11641
+        },
+        {
+          "season": "2025/26",
+          "rank": 266966
+        }
+      ]
+    },
+    {
+      "teamId": 2976563,
+      "teamName": "Alisson Wonderland",
+      "managerName": "Piotr Bialota",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 47783
+        },
+        {
+          "season": "2022/23",
+          "rank": 298343
+        },
+        {
+          "season": "2023/24",
+          "rank": 22390
+        },
+        {
+          "season": "2024/25",
+          "rank": 221687
+        },
+        {
+          "season": "2025/26",
+          "rank": 22836
+        }
+      ]
+    },
+    {
+      "teamId": 3746366,
+      "teamName": "Petezeeboys",
+      "managerName": "Peter Cullivan",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 54340
+        },
+        {
+          "season": "2022/23",
+          "rank": 307961
+        },
+        {
+          "season": "2023/24",
+          "rank": 40442
+        },
+        {
+          "season": "2024/25",
+          "rank": 197412
+        },
+        {
+          "season": "2025/26",
+          "rank": 32738
+        }
+      ]
+    },
+    {
+      "teamId": 38850,
+      "teamName": "Spuds and Oranges",
+      "managerName": "Stefan Stanoeski",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 158070
+        },
+        {
+          "season": "2022/23",
+          "rank": 85524
+        },
+        {
+          "season": "2023/24",
+          "rank": 60216
+        },
+        {
+          "season": "2024/25",
+          "rank": 33176
+        },
+        {
+          "season": "2025/26",
+          "rank": 382127
+        }
+      ]
+    },
+    {
+      "teamId": 169785,
+      "teamName": "Jacquet Potato",
+      "managerName": "Jamie Adderley",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 4427
+        },
+        {
+          "season": "2022/23",
+          "rank": 37647
+        },
+        {
+          "season": "2023/24",
+          "rank": 85923
+        },
+        {
+          "season": "2024/25",
+          "rank": 146650
+        },
+        {
+          "season": "2025/26",
+          "rank": 475309
+        }
+      ]
+    },
+    {
+      "teamId": 550849,
+      "teamName": "mou tuck teng",
+      "managerName": "Khang Wei Tai",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 62209
+        },
+        {
+          "season": "2022/23",
+          "rank": 119261
+        },
+        {
+          "season": "2023/24",
+          "rank": 2792
+        },
+        {
+          "season": "2024/25",
+          "rank": 564874
+        },
+        {
+          "season": "2025/26",
+          "rank": 15317
+        }
+      ]
+    },
+    {
+      "teamId": 3552689,
+      "teamName": "Untouchables",
+      "managerName": "Cathal Turner",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 52206
+        },
+        {
+          "season": "2022/23",
+          "rank": 29636
+        },
+        {
+          "season": "2023/24",
+          "rank": 36777
+        },
+        {
+          "season": "2024/25",
+          "rank": 329354
+        },
+        {
+          "season": "2025/26",
+          "rank": 400687
+        }
+      ]
+    },
+    {
+      "teamId": 1279524,
+      "teamName": "I De-Clyne Toulouse",
+      "managerName": "Logan Lloyd",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 88993
+        },
+        {
+          "season": "2022/23",
+          "rank": 232738
+        },
+        {
+          "season": "2023/24",
+          "rank": 13118
+        },
+        {
+          "season": "2024/25",
+          "rank": 84369
+        },
+        {
+          "season": "2025/26",
+          "rank": 433721
+        }
+      ]
+    },
+    {
+      "teamId": 23565,
+      "teamName": "Alcohooligans",
+      "managerName": "Christian Dehlie Lokøy",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 42698
+        },
+        {
+          "season": "2022/23",
+          "rank": 91138
+        },
+        {
+          "season": "2023/24",
+          "rank": 120426
+        },
+        {
+          "season": "2024/25",
+          "rank": 44317
+        },
+        {
+          "season": "2025/26",
+          "rank": 757590
+        }
+      ]
+    },
+    {
+      "teamId": 38581,
+      "teamName": "Lennys Lions XI",
+      "managerName": "Brian Leneghan",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 63938
+        },
+        {
+          "season": "2022/23",
+          "rank": 151462
+        },
+        {
+          "season": "2023/24",
+          "rank": 786983
+        },
+        {
+          "season": "2024/25",
+          "rank": 31671
+        },
+        {
+          "season": "2025/26",
+          "rank": 85615
+        }
+      ]
+    },
+    {
+      "teamId": 378019,
+      "teamName": "Shanning City",
+      "managerName": "Charlie Two",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 232362
+        },
+        {
+          "season": "2022/23",
+          "rank": 27112
+        },
+        {
+          "season": "2023/24",
+          "rank": 73054
+        },
+        {
+          "season": "2024/25",
+          "rank": 806765
+        },
+        {
+          "season": "2025/26",
+          "rank": 14869
+        }
+      ]
+    },
+    {
+      "teamId": 379776,
+      "teamName": "Viltrumite XI",
+      "managerName": "Ethan King",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 15159
+        },
+        {
+          "season": "2022/23",
+          "rank": 159651
+        },
+        {
+          "season": "2023/24",
+          "rank": 65906
+        },
+        {
+          "season": "2024/25",
+          "rank": 18936
+        },
+        {
+          "season": "2025/26",
+          "rank": 1112201
+        }
+      ]
+    },
+    {
+      "teamId": 82213,
+      "teamName": "ABCDE FC",
+      "managerName": "Anthony Foo",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 26356
+        },
+        {
+          "season": "2022/23",
+          "rank": 162466
+        },
+        {
+          "season": "2023/24",
+          "rank": 13071
+        },
+        {
+          "season": "2024/25",
+          "rank": 1290072
+        },
+        {
+          "season": "2025/26",
+          "rank": 74579
+        }
+      ]
+    },
+    {
+      "teamId": 276270,
+      "teamName": "DontBelieveTheHype",
+      "managerName": "Stuart Mac",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 202078
+        },
+        {
+          "season": "2022/23",
+          "rank": 80679
+        },
+        {
+          "season": "2023/24",
+          "rank": 43614
+        },
+        {
+          "season": "2024/25",
+          "rank": 1322478
+        },
+        {
+          "season": "2025/26",
+          "rank": 46727
+        }
+      ]
+    },
+    {
+      "teamId": 3696857,
+      "teamName": "Beto Call Saul",
+      "managerName": "Caolan Reilly",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 265923
+        },
+        {
+          "season": "2022/23",
+          "rank": 41961
+        },
+        {
+          "season": "2023/24",
+          "rank": 10599
+        },
+        {
+          "season": "2024/25",
+          "rank": 3682
+        },
+        {
+          "season": "2025/26",
+          "rank": 1427970
+        }
+      ]
+    },
+    {
+      "teamId": 1324990,
+      "teamName": "Me Myself Ndiaye",
+      "managerName": "Michael Kachi",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 329498
+        },
+        {
+          "season": "2022/23",
+          "rank": 85400
+        },
+        {
+          "season": "2023/24",
+          "rank": 39617
+        },
+        {
+          "season": "2024/25",
+          "rank": 85239
+        },
+        {
+          "season": "2025/26",
+          "rank": 1219175
+        }
+      ]
+    },
+    {
+      "teamId": 4413228,
+      "teamName": "Lavia La Vida Loca",
+      "managerName": "Tommy Taor",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 297975
+        },
+        {
+          "season": "2022/23",
+          "rank": 46725
+        },
+        {
+          "season": "2023/24",
+          "rank": 37269
+        },
+        {
+          "season": "2024/25",
+          "rank": 1839714
+        },
+        {
+          "season": "2025/26",
+          "rank": 57068
+        }
+      ]
+    },
+    {
+      "teamId": 206922,
+      "teamName": "DiagonAlly McCoist",
+      "managerName": "Andrew Brown",
+      "topFinishes": 3,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "rank": 1663864
+        },
+        {
+          "season": "2022/23",
+          "rank": 968946
+        },
+        {
+          "season": "2023/24",
+          "rank": 62314
+        },
+        {
+          "season": "2024/25",
+          "rank": 1766
+        },
+        {
+          "season": "2025/26",
+          "rank": 89115
+        }
+      ]
+    }
+  ]
+}

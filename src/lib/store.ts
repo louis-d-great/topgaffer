@@ -81,9 +81,13 @@ export interface Expert {
   teamId: number;
   name: string;
   handle: string;
-  platform: "x" | "youtube" | "other";
-  /** ISO 3166 alpha-2, e.g. "NG", "GB", "US". */
+  /** "fpl" for managers known only by their FPL record (top 50, proven). */
+  platform: "x" | "youtube" | "other" | "fpl";
+  /** ISO 3166 alpha-2, e.g. "NG", "GB", "US"; "XX" when unknown. */
   country: string;
+  group?: "top" | "proven" | "creator";
+  /** Proven managers: top-100k finishes in their last five seasons. */
+  topFinishes?: number;
 }
 
 export interface LockedPlan {
