@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AlertTriangle, ArrowRight, ArrowUpRight, Brain, CheckCircle2, Info } from "lucide-react";
+import { AlertTriangle, ArrowRight, ArrowUpRight, Brain, CheckCircle2, Info } from "@/components/icons";
 import { useManager } from "@/components/app-shell";
 import { ChartCard, ColumnChart, LineChart, SERIES, Sparkline, compact } from "@/components/charts";
 import { CountUp, ErrorCard, Skeleton, TeamBadge } from "@/components/ui";
@@ -167,7 +167,7 @@ function FocusPanel({ profile, topLesson, lastReview, now }: { profile: ManagerP
             <p className="flex items-center gap-1.5 text-xs font-semibold text-neutral-900/70">
               <Brain size={14} /> {lastReview ? `From your GW${lastReview.gw} plan review` : "Before you decide"}
             </p>
-            <p className="mt-1 text-[15px] leading-snug font-semibold">{lastReview ? lastReview.lesson : topLesson!.title}</p>
+            <p className="mt-1 text-[0.9375rem] leading-snug font-semibold">{lastReview ? lastReview.lesson : topLesson!.title}</p>
           </div>
         )}
 
@@ -386,7 +386,7 @@ function LessonRow({ lesson, featured = false }: { lesson: Lesson; featured?: bo
         <Icon size={16} />
       </span>
       <div className="min-w-0">
-        <p className="text-[15px] leading-snug font-semibold">{lesson.title}</p>
+        <p className="text-[0.9375rem] leading-snug font-semibold">{lesson.title}</p>
         <p className="mt-0.5 text-sm text-muted">{lesson.detail}</p>
       </div>
     </li>

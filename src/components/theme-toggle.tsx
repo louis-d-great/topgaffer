@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "@/components/icons";
 import { useLocal } from "@/lib/store";
 
 export type Theme = "dark" | "light";

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, ArrowRight, Crown, Lightbulb, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Crown, Lightbulb, ShieldCheck } from "@/components/icons";
 import { useManager } from "@/components/app-shell";
 import { BarList, ChartCard, ColumnChart, CompareMeter, LineChart, SERIES, compact } from "@/components/charts";
 import { ErrorCard, Skeleton, TeamBadge } from "@/components/ui";

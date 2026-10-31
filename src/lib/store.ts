@@ -3,7 +3,7 @@
 import { useCallback, useSyncExternalStore } from "react";
 
 /*
- * Local, per-device state until Supabase + Walrus are wired in.
+ * Per-device state. Locked plans are also kept on Walrus and restored from there.
  * Every read and write is wrapped: storage can be blocked (private mode, previews).
  */
 
@@ -71,7 +71,8 @@ export function useHydrated() {
 export const KEYS = {
   teamId: "tg.teamId",
   experts: "tg.experts.v2",
-  plans: "tg.plans",
+  /** Locked plans, per team: one browser can follow several teams. */
+  plansFor: (teamId: number) => `tg.plans.${teamId}`,
   dismissed: "tg.dismissedLessons",
 } as const;
 
@@ -100,4 +101,6 @@ export interface LockedPlan {
   verdict?: string;
   hitCost?: number;
   warnings?: { id: string; title: string }[];
+  /** Rebuilt from Walrus on this device (no salt, so it can't be re-proved here). */
+  restored?: boolean;
 }

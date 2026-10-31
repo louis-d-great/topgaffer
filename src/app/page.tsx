@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
-import { ArrowRight, Brain, Loader2, Lock, Users } from "lucide-react";
+import { ArrowRight, Brain, Loader2, Lock, Users } from "@/components/icons";
 import { Logo } from "@/components/app-shell";
 import { ToneChip } from "@/components/ui";
 import { KEYS, useHydrated, useLocal } from "@/lib/store";

@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { AlertTriangle, CalendarDays, Check, CheckCircle2, Database, ExternalLink, Info, Lightbulb, Loader2, Lock, Search, Sparkles, Undo2 } from "lucide-react";
+import { AlertTriangle, CalendarDays, Check, CheckCircle2, Database, ExternalLink, Info, Lightbulb, Loader2, Lock, Search, Sparkles, Undo2 } from "@/components/icons";
 import { useManager } from "@/components/app-shell";
 import { ActionRow, CountBadge, Panel, PanelLink, StatCard, type Tone } from "@/components/panel";
 import { ErrorCard, PageHeader, Skeleton, ToneChip } from "@/components/ui";
 import type { Lesson, LessonTone } from "@/lib/fpl/types";
-import { KEYS, useLocal, type LockedPlan } from "@/lib/store";
+import { KEYS, useLocal } from "@/lib/store";
+import { usePlans } from "@/lib/use-plans";
 import type { SavedMemory } from "@/lib/use-memory-sync";
 import { Button } from "@/components/base/buttons/button";
 import { SegmentedControl, SegmentedControlItem } from "@/components/base/segmented-control/segmented-control";
@@ -24,7 +25,7 @@ const FILTERS: { key: "all" | LessonTone; label: string }[] = [
 export default function MemoryPage() {
   const { teamId, profile, error, memory, reviews } = useManager();
   const [dismissed, setDismissed] = useLocal<string[]>(KEYS.dismissed, []);
-  const [plans] = useLocal<Record<string, LockedPlan>>(KEYS.plans, {});
+  const [plans] = usePlans(teamId);
   const [filter, setFilter] = useState<"all" | LessonTone>("all");
 
   if (error) return <ErrorCard message={error} onRetry={() => location.reload()} />;
@@ -133,7 +134,7 @@ export default function MemoryPage() {
           </ul>
         </Panel>
 
-        <Panel className="xl:col-span-4" title="Locked plans" subtitle="Reviewed after each gameweek · proofs on Sui" action={<PanelLink href="/deadline">Deadline</PanelLink>}>
+        <Panel className="xl:col-span-4" title="Locked plans" subtitle="Kept on Walrus, so they follow you to any device · proofs on Sui" action={<PanelLink href="/deadline">Deadline</PanelLink>}>
           <ul className="divide-y divide-line">
             {locks.map((p) => (
               <ActionRow
@@ -150,7 +151,7 @@ export default function MemoryPage() {
                       On Sui <ExternalLink size={11} />
                     </a>
                   ) : (
-                    <span className="text-xs text-faint">This device</span>
+                    <span className="text-xs text-faint">Walrus only</span>
                   )
                 }
               />
@@ -277,7 +278,7 @@ function LessonCard({ lesson, saved, onDismiss, featured = false }: { lesson: Le
         <ToneChip tone={lesson.tone} detail={lesson.topic[0].toUpperCase() + lesson.topic.slice(1)} />
         <WalrusStatus saved={saved} />
       </div>
-      <h3 className={`mt-2 leading-snug font-semibold ${featured ? "text-xl" : "text-[15px]"}`}>{lesson.title}</h3>
+      <h3 className={`mt-2 leading-snug font-semibold ${featured ? "text-xl" : "text-[0.9375rem]"}`}>{lesson.title}</h3>
       <p className="mt-1 text-sm text-muted">{lesson.detail}</p>
       <div className="mt-3 flex items-center justify-between gap-3">
         <span className="text-xs text-faint">{lesson.evidence}</span>

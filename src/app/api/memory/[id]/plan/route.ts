@@ -1,32 +1,30 @@
 import type { NextRequest } from "next/server";
 import { parseId } from "@/lib/fpl/respond";
 import { remember, isRateLimited } from "@/lib/memory";
+import { decodePlan, encodePlan } from "@/lib/plan-data";
 
 interface PlanMemory {
-  gw: number;
   teamName: string;
   summary: string;
-  verdict: string;
-  warnings: string[];
-  fingerprint: string;
+  /** The structured plan, in the wire shape of plan-data.ts. */
+  plan: unknown;
 }
 
-/** Remembers a locked deadline plan, including the warnings the manager chose to ignore. */
+/** Remembers a locked deadline plan: a readable summary for the coach, plus the plan itself so any device can restore it. */
 export async function POST(req: NextRequest, ctx: RouteContext<"/api/memory/[id]/plan">) {
   const id = parseId((await ctx.params).id);
   const b = (await req.json().catch(() => null)) as Partial<PlanMemory> | null;
-  if (!id || !b || !Number.isInteger(b.gw) || typeof b.fingerprint !== "string" || !/^[0-9a-f]{64}$/.test(b.fingerprint)) {
-    return Response.json({ error: "Invalid plan" }, { status: 400 });
-  }
+  const plan = decodePlan(b?.plan);
+  if (!id || !plan) return Response.json({ error: "Invalid plan" }, { status: 400 });
   const clip = (s: unknown, n: number) => (typeof s === "string" ? s.slice(0, n) : "");
-  const warnings = Array.isArray(b.warnings) ? b.warnings.slice(0, 6).map((w) => clip(w, 160)).filter(Boolean) : [];
+  const warnings = plan.warnings ?? [];
   const text =
-    `[TopGaffer · ${clip(b.teamName, 60)} · GW${b.gw} plan locked] ${clip(b.summary, 300)} ` +
-    `Verdict: ${clip(b.verdict, 40)}.` +
-    (warnings.length ? ` Warnings shown before locking: ${warnings.join("; ")}.` : "") +
-    ` Fingerprint ${b.fingerprint.slice(0, 16)}.`;
+    `[TopGaffer · ${clip(b?.teamName, 60)} · GW${plan.gw} plan locked] ${clip(b?.summary, 300)} ` +
+    `Verdict: ${plan.verdict ?? "unknown"}.` +
+    (warnings.length ? ` Warnings shown before locking: ${warnings.map((w) => w.title).join("; ")}.` : "") +
+    ` Fingerprint ${plan.fingerprint.slice(0, 16)}. ${encodePlan(plan)}`;
   try {
-    const [job] = await remember(id, [{ key: `gw${b.gw}-plan-${b.fingerprint.slice(0, 12)}`, text }]);
+    const [job] = await remember(id, [{ key: `gw${plan.gw}-plan-${plan.fingerprint.slice(0, 12)}`, text }]);
     return Response.json({ jobId: job.jobId });
   } catch (err) {
     if (isRateLimited(err)) return Response.json({ error: "Walrus Memory is busy. Retrying shortly." }, { status: 429 });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Search, X } from "lucide-react";
+import { Search, X } from "@/components/icons";
 import type { Player, Position, SquadPlayer } from "@/lib/fpl/types";
 import { FdrPill, TeamBadge } from "./ui";
 

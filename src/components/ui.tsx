@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { AlertTriangle, CheckCircle2, Info } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Info } from "@/components/icons";
 import type { LessonTone } from "@/lib/fpl/types";
 import { FDR, KITS } from "./kit";
 

@@ -77,6 +77,19 @@ html {
   background: var(--color-ink);
 }
 
+/* Big screens read better denser. Sizes are in rem, so the whole layout scales together;
+   phones and tablets keep the full 16px base. The tiniest labels stay in px so they never shrink further. */
+@media (min-width: 1280px) {
+  html {
+    font-size: 87.5%;
+  }
+}
+@media (min-width: 1680px) {
+  html {
+    font-size: 81.25%;
+  }
+}
+
 body {
   background: var(--color-ink);
   color: var(--color-text);

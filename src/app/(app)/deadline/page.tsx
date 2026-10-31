@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AlertTriangle, ArrowDownUp, Check, CheckCircle2, Crown, ExternalLink, Fingerprint, Loader2, Lock, Minus, Plus, RotateCcw, ShieldAlert, ShieldCheck, Users, Wallet, X } from "lucide-react";
+import { AlertTriangle, ArrowDownUp, Check, CheckCircle2, Crown, ExternalLink, Fingerprint, Loader2, Lock, Minus, Plus, RotateCcw, ShieldAlert, ShieldCheck, Users, Wallet, X } from "@/components/icons";
 import { useManager } from "@/components/app-shell";
 import { PlayerPicker } from "@/components/player-picker";
 import { FixtureChip, Jersey } from "@/components/kit";
@@ -10,7 +10,8 @@ import { useExperts } from "@/lib/experts";
 import { ActionRow, CountBadge, IconTile, Panel, RowGroup, type Tone } from "@/components/panel";
 import { fmtDeadline } from "@/lib/format";
 import type { DeadlineData, ManagerProfile, Position, SquadPlayer } from "@/lib/fpl/types";
-import { KEYS, useLocal, type LockedPlan } from "@/lib/store";
+import type { LockedPlan } from "@/lib/store";
+import { usePlans } from "@/lib/use-plans";
 import { useApi } from "@/lib/use-api";
 import { fingerprint, judgePlan, type Note, type Verdict } from "@/lib/verdict";
 import { Button } from "@/components/base/buttons/button";
@@ -34,7 +35,7 @@ const ROWS: Position[] = ["GKP", "DEF", "MID", "FWD"];
 
 function DeadlineCheck({ data, profile, teamId }: { data: DeadlineData; profile: ManagerProfile; teamId: number }) {
   const gw = data.gw.id;
-  const [plans, setPlans] = useLocal<Record<string, LockedPlan>>(KEYS.plans, {});
+  const [plans, setPlans] = usePlans(teamId);
   const { tracked } = useExperts();
   const { memory, reviews } = useManager();
   const locked = plans[gw];
@@ -121,14 +122,11 @@ function DeadlineCheck({ data, profile, teamId }: { data: DeadlineData; profile:
     const moves = complete.map((s) => `${nm(s.in)} in for ${nm(s.out)}`).join(", ");
     memory
       .rememberPlan({
-        gw,
         teamName: profile.teamName,
         summary:
           `Captain ${nm(captain)}. ${moves ? `Transfers: ${moves}` : "No transfers"}${verdict.hitCost ? ` (−${verdict.hitCost} hit)` : ""}.` +
           (entry.sui ? ` Locked on Sui ${entry.sui.network}, transaction ${entry.sui.digest}.` : ""),
-        verdict: LEVELS[verdict.level].label,
-        warnings: verdict.notes.filter((n) => n.tone === "warning" || n.tone === "blocker").map((n) => n.title),
-        fingerprint: fp,
+        plan: entry,
       })
       .catch(() => {
         // The lock itself is saved locally; only the memory copy of this plan is missing.
@@ -166,7 +164,7 @@ function DeadlineCheck({ data, profile, teamId }: { data: DeadlineData; profile:
       </PageHeader>
 
       <div className="grid gap-5 lg:grid-cols-[1.35fr_1fr] xl:grid-cols-12">
-        <section className="xl:col-span-7">
+        <section className="min-w-0 xl:col-span-7">
           {/* Pitch: mown stripes, vignette, floodlit centre */}
           <div className="relative overflow-hidden rounded-t-xl bg-[repeating-linear-gradient(180deg,#17603a_0_56px,#124d2b_56px_112px)] px-2 pt-6 pb-8 shadow-[inset_0_0_140px_rgba(0,0,0,0.65),0_20px_40px_-20px_rgba(0,0,0,0.8)] ring-1 ring-white/10 sm:px-4">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_45%_at_50%_45%,rgba(212,255,58,0.08),transparent_70%)]" />
@@ -249,7 +247,7 @@ function DeadlineCheck({ data, profile, teamId }: { data: DeadlineData; profile:
           {editing && <p className="mt-3 text-center text-xs text-faint">Tap a player to make him captain or sell him.</p>}
         </section>
 
-        <aside className="lg:sticky lg:top-24 lg:self-start xl:col-span-5">
+        <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start xl:col-span-5">
           <VerdictPanel
             verdict={verdict}
             captain={byId.get(captain)?.name ?? ""}
@@ -322,7 +320,7 @@ function PlayerChip({
     <button
       onClick={onClick}
       style={{ animationDelay: `${order * 35}ms` }}
-      className="group relative flex w-[4.4rem] animate-rise flex-col items-center rounded-xl pt-1 pb-1 outline-none focus-visible:ring-2 focus-visible:ring-volt sm:w-24"
+      className="group relative flex w-[4.4rem] min-w-0 shrink animate-rise flex-col items-center rounded-xl pt-1 pb-1 outline-none focus-visible:ring-2 focus-visible:ring-volt sm:w-24"
     >
       <span className="relative grid place-items-center transition duration-200 group-hover:-translate-y-1">
         {captain && <span className="absolute inset-0 -m-2 animate-glow rounded-full bg-volt/35 blur-lg" aria-hidden />}
@@ -360,7 +358,7 @@ function PlayerChip({
       <FixtureChip fixture={p.fixture} />
 
       {/* Hover card */}
-      <span className={`pointer-events-none absolute left-1/2 z-20 hidden w-44 ${tipBelow ? "top-full mt-1" : "bottom-full mb-1"} -translate-x-1/2 rounded-xl border border-line-strong bg-raised/95 p-2.5 text-left shadow-2xl shadow-black/60 backdrop-blur group-hover:block group-focus-visible:block`}>
+      <span className={`pointer-events-none absolute left-1/2 z-20 hidden w-44 ${tipBelow ? "top-full mt-1" : "bottom-full mb-1"} -translate-x-1/2 rounded-xl border border-line-strong bg-raised/95 p-2.5 text-left shadow-2xl shadow-black/60 backdrop-blur sm:group-hover:block sm:group-focus-visible:block`}>
         <span className="block text-xs font-semibold text-text">{p.fullName}</span>
         <span className="mt-1.5 grid grid-cols-3 gap-1 text-center">
           {[
@@ -587,7 +585,7 @@ function VerdictPanel({
               </a>
             ) : (
               <div className="mt-3">
-                <p className="text-xs text-warn">{lockError ?? "Saved on this device, not yet recorded on Sui."}</p>
+                <p className="text-xs text-warn">{lockError ?? "Saved, but not yet recorded on Sui."}</p>
                 <Button size="small" onClick={onRetrySui} disabled={saving} leadingIcon={saving ? Spinner : ShieldCheck} className="mt-2">
                   {saving ? "Recording on Sui…" : "Record on Sui now"}
                 </Button>

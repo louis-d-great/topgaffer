@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { Check, Crown, Loader2, Medal, Search, Trash2, Trophy, UserPlus, Users, X } from "lucide-react";
+import { Check, Crown, Loader2, Medal, Search, Trash2, Trophy, UserPlus, Users, X } from "@/components/icons";
 import { useManager } from "@/components/app-shell";
 import { ActionRow, CountBadge, Panel, PanelLink, StatCard } from "@/components/panel";
 import { ErrorCard, PageHeader, Skeleton } from "@/components/ui";
@@ -122,7 +122,7 @@ function Leaderboard({
     <section className="card overflow-hidden xl:col-span-8">
       <header className="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
         <div>
-          <h2 className="text-[15px] font-semibold">Leaderboard</h2>
+          <h2 className="text-[0.9375rem] font-semibold">Leaderboard</h2>
           <p className="mt-0.5 text-xs text-muted">This season · select a row to compare captains, or a name for the full dashboard</p>
         </div>
         <CountBadge>{tracked.length} experts</CountBadge>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
-import { Brain, CalendarDays, ChevronDown, Lightbulb, Loader2, MessageCircleQuestion, RotateCcw, Send, Sparkles, Users } from "lucide-react";
+import { Brain, CalendarDays, ChevronDown, Lightbulb, Loader2, MessageCircleQuestion, RotateCcw, Send, Sparkles, Users } from "@/components/icons";
 import { useManager } from "@/components/app-shell";
 import { ActionRow, Panel } from "@/components/panel";
 import { PageHeader, Skeleton } from "@/components/ui";

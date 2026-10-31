@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ComponentType, ReactNode } from "react";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight } from "@/components/icons";
 
 /*
  * Structured panels: a header bar (title + action or count), flush rows split
@@ -27,7 +27,7 @@ const BADGE: Record<Tone, string> = {
   neutral: "bg-fg/[0.08] text-muted",
 };
 
-type Icon = ComponentType<{ size?: number; className?: string }>;
+type Icon = ComponentType<{ size?: number | string; className?: string }>;
 
 export function Panel({
   title,
@@ -46,7 +46,7 @@ export function Panel({
     <section className={`card flex flex-col overflow-hidden ${className}`}>
       <header className="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
         <div className="min-w-0">
-          <h2 className="truncate text-[15px] font-semibold">{title}</h2>
+          <h2 className="truncate text-[0.9375rem] font-semibold">{title}</h2>
           {subtitle && <p className="mt-0.5 truncate text-xs text-muted">{subtitle}</p>}
         </div>
         {action}

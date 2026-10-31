@@ -40,7 +40,7 @@ const styles = sortCx({
     xs: "size-5 text-[10px] leading-[15px] font-semibold",
     sm: "size-6 text-caption-1-semibold tracking-normal",
     md: "size-8 text-headline-semibold",
-    lg: "size-9 text-[18px] leading-6 font-semibold",
+    lg: "size-9 text-[1.125rem] leading-6 font-semibold",
   },
   color: {
     neutral: "bg-avatar-neutral-background text-text-secondary",

@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ManagerProfile } from "./fpl/types";
-import { useLocal } from "./store";
+import { toWire } from "./plan-data";
+import { useLocal, type LockedPlan } from "./store";
 
 export interface SavedMemory {
   jobId: string;
@@ -104,7 +105,7 @@ export function useMemorySync(teamId: number | null, profile: ManagerProfile | n
 
   /** Remembers a locked plan (with the warnings shown) on Walrus. */
   const rememberPlan = useCallback(
-    async (plan: { gw: number; teamName: string; summary: string; verdict: string; warnings: string[]; fingerprint: string }) => {
+    async ({ plan, ...rest }: { teamName: string; summary: string; plan: LockedPlan }) => {
       if (!teamId) return;
       let res: Response;
       let body: { jobId?: string; error?: string };
@@ -112,14 +113,14 @@ export function useMemorySync(teamId: number | null, profile: ManagerProfile | n
         res = await fetch(`/api/memory/${teamId}/plan`, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify(plan),
+          body: JSON.stringify({ ...rest, plan: toWire(plan) }),
         });
         body = await res.json();
         if (res.status !== 429 || attempt >= 3) break;
         await new Promise((r) => setTimeout(r, BUSY_RETRY_MS / 2));
       }
       if (!res.ok || !body.jobId) throw new Error(body.error ?? "Couldn't save the plan to memory");
-      merge({ [`gw${plan.gw}-plan-${plan.fingerprint.slice(0, 12)}`]: { jobId: body.jobId, status: "pending", blobId: null, text: plan.summary } });
+      merge({ [`gw${plan.gw}-plan-${plan.fingerprint.slice(0, 12)}`]: { jobId: body.jobId, status: "pending", blobId: null, text: rest.summary } });
     },
     [teamId, merge],
   );

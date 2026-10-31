@@ -3,7 +3,19 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Suspense, createContext, useContext, useEffect, type ReactNode } from "react";
-import { Brain, LayoutGrid, Loader2, LogOut, Sparkles, Timer, Users } from "lucide-react";
+import {
+  RiBrain2Fill,
+  RiBrain2Line,
+  RiDashboardFill,
+  RiDashboardLine,
+  RiSparkling2Fill,
+  RiSparkling2Line,
+  RiTeamFill,
+  RiTeamLine,
+  RiTimerFlashFill,
+  RiTimerFlashLine,
+} from "@remixicon/react";
+import { Brain, Loader2, LogOut } from "@/components/icons";
 import { KEYS, useHydrated, useLocal } from "@/lib/store";
 import { useApi } from "@/lib/use-api";
 import { ThemeToggle } from "./theme-toggle";
@@ -16,11 +28,11 @@ import type { ManagerProfile } from "@/lib/fpl/types";
 import { Avatar as BoardAvatar } from "@/components/base/avatar/avatar";
 
 const NAV = [
-  { href: "/home", label: "Home", icon: LayoutGrid },
-  { href: "/deadline", label: "Deadline", icon: Timer },
-  { href: "/coach", label: "Coach", icon: Sparkles },
-  { href: "/experts", label: "Experts", icon: Users },
-  { href: "/memory", label: "Memory", icon: Brain },
+  { href: "/home", label: "Home", icon: RiDashboardLine, activeIcon: RiDashboardFill },
+  { href: "/deadline", label: "Deadline", icon: RiTimerFlashLine, activeIcon: RiTimerFlashFill },
+  { href: "/coach", label: "Coach", icon: RiSparkling2Line, activeIcon: RiSparkling2Fill },
+  { href: "/experts", label: "Experts", icon: RiTeamLine, activeIcon: RiTeamFill },
+  { href: "/memory", label: "Memory", icon: RiBrain2Line, activeIcon: RiBrain2Fill },
 ];
 
 interface ManagerCtx {
@@ -78,7 +90,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="flex min-h-dvh w-full">
         {/* Desktop sidebar */}
         <div className="sticky top-0 hidden h-dvh shrink-0 p-3 pr-0 md:block">
-          <aside className="flex h-full w-[272px] flex-col rounded-3xl border border-line bg-surface p-3 shadow-[0_1px_0_0_rgb(255_255_255/0.04)_inset,0_10px_30px_-12px_rgb(0_0_0/0.8)]">
+          <aside className="flex h-full w-68 flex-col rounded-3xl border border-line bg-surface p-3 shadow-[0_1px_0_0_rgb(255_255_255/0.04)_inset,0_10px_30px_-12px_rgb(0_0_0/0.8)]">
             <Link href="/home" className="flex items-center rounded-2xl px-2 py-2">
               <Logo />
             </Link>
@@ -216,7 +228,7 @@ function GameweekCard({ profile }: { profile: ManagerProfile }) {
       <p className="section-label">This gameweek</p>
       <dl className="mt-2 space-y-1.5">
         {rows.map(([k, v]) => (
-          <div key={k} className="flex items-baseline justify-between gap-2 text-[13px]">
+          <div key={k} className="flex items-baseline justify-between gap-2 text-[0.8125rem]">
             <dt className="text-muted">{k}</dt>
             <dd className="num font-medium text-text">{v}</dd>
           </div>
@@ -252,20 +264,20 @@ function CurrentMobileNav() {
 function SideNav({ active }: { active: string | null }) {
   return (
     <nav className="flex flex-col gap-1">
-      {NAV.map(({ href, label, icon: Icon }) => {
+      {NAV.map(({ href, label, icon: Icon, activeIcon: ActiveIcon }) => {
         const on = href === active;
         return (
           <Link
             key={href}
             href={href}
             aria-current={on ? "page" : undefined}
-            className={`flex h-11 items-center gap-3 rounded-xl px-3 text-[15px] font-medium transition ${
+            className={`flex h-11 items-center gap-3 rounded-xl px-3 text-[0.9375rem] font-medium transition ${
               on
                 ? "bg-linear-to-b from-accent-500 to-accent-600 text-neutral-950 shadow-[0_0_0_1px_var(--color-accent-500),inset_0_1px_0_0_rgb(255_255_255/0.35)]"
                 : "text-muted hover:bg-fg/[0.05] hover:text-text"
             }`}
           >
-            <Icon size={20} strokeWidth={on ? 2.2 : 1.8} />
+            {on ? <ActiveIcon size={20} /> : <Icon size={20} />}
             {label}
           </Link>
         );
@@ -277,7 +289,7 @@ function SideNav({ active }: { active: string | null }) {
 function MobileNav({ active }: { active: string | null }) {
   return (
     <nav className="fixed inset-x-3 bottom-3 z-30 grid grid-cols-5 rounded-xl border border-line-strong bg-pitch/90 p-1 backdrop-blur-xl md:hidden">
-      {NAV.map(({ href, label, icon: Icon }) => {
+      {NAV.map(({ href, label, icon: Icon, activeIcon: ActiveIcon }) => {
         const on = href === active;
         return (
           <Link
@@ -285,7 +297,7 @@ function MobileNav({ active }: { active: string | null }) {
             href={href}
             className={`flex flex-col items-center gap-0.5 rounded-lg py-1.5 text-[10px] font-medium transition ${on ? "bg-fg/[0.08] text-text" : "text-muted"}`}
           >
-            <Icon size={18} strokeWidth={2} className={on ? "text-volt-text" : ""} />
+            {on ? <ActiveIcon size={18} className="text-volt-text" /> : <Icon size={18} />}
             {label}
           </Link>
         );

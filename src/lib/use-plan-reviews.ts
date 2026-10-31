@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ManagerProfile } from "./fpl/types";
 import { reviewPlan, type PlanReview } from "./plan-review";
-import { KEYS, useLocal, type LockedPlan } from "./store";
+import { usePlans, useRestorePlans } from "./use-plans";
 import { prefetch } from "./use-api";
 import type { MemorySync } from "./use-memory-sync";
 
@@ -38,7 +38,8 @@ function useLivePoints(gws: number[]) {
  * to Walrus once. The newest review feeds the next deadline's verdict.
  */
 export function usePlanReviews(teamId: number | null, profile: ManagerProfile | null, memory: MemorySync) {
-  const [plans] = useLocal<Record<string, LockedPlan>>(KEYS.plans, {});
+  useRestorePlans(teamId);
+  const [plans] = usePlans(teamId);
   const finished = useMemo(
     () => (profile ? Object.values(plans).filter((p) => profile.gameweeks.some((g) => g.gw === p.gw)) : []),
     [plans, profile],
