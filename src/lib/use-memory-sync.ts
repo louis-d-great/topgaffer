@@ -129,7 +129,8 @@ export function useMemorySync(teamId: number | null, profile: ManagerProfile | n
   const pendingNotes = useRef(new Set<string>());
   const rememberNote = useCallback(
     async (key: string, label: string, text: string) => {
-      if (!teamId || ledgerRef.current[key] || pendingNotes.current.has(key)) return;
+      const saved = ledgerRef.current[key];
+      if (!teamId || (saved && !DEAD.has(saved.status)) || pendingNotes.current.has(key)) return;
       pendingNotes.current.add(key);
       try {
         const res = await fetch(`/api/memory/${teamId}/note`, {

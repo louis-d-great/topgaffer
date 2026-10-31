@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { AlertTriangle, ArrowDownUp, Check, CheckCircle2, Crown, ExternalLink, Fingerprint, Loader2, Lock, Minus, Plus, RotateCcw, ShieldAlert, ShieldCheck, Users, Wallet, X } from "@/components/icons";
 import { useManager } from "@/components/app-shell";
 import { PlayerPicker } from "@/components/player-picker";
-import { FixtureChip, Jersey } from "@/components/kit";
+import { FDR, FixtureChip, Jersey } from "@/components/kit";
 import { ErrorCard, FdrPill, PageHeader, Skeleton, TeamBadge } from "@/components/ui";
 import { useExperts } from "@/lib/experts";
 import { ActionRow, CountBadge, IconTile, Panel, RowGroup, type Tone } from "@/components/panel";
@@ -13,6 +13,7 @@ import type { DeadlineData, ManagerProfile, Position, SquadPlayer } from "@/lib/
 import type { LockedPlan } from "@/lib/store";
 import { usePlans } from "@/lib/use-plans";
 import { useApi } from "@/lib/use-api";
+import { suggestTransfers, type Suggestion } from "@/lib/suggest";
 import { fingerprint, judgePlan, type Note, type Verdict } from "@/lib/verdict";
 import { Button } from "@/components/base/buttons/button";
 
@@ -82,6 +83,12 @@ function DeadlineCheck({ data, profile, teamId }: { data: DeadlineData; profile:
     setSwaps((prev) => [...prev.filter((s) => s.out !== picking), { out: picking, in: inId }]);
     if (captain === picking) setCaptain(inId);
     setPicking(null);
+  }
+
+  function applySuggestion(out: number, inId: number) {
+    setSwaps((prev) => [...prev.filter((s) => s.out !== out), { out, in: inId }]);
+    if (captain === out) setCaptain(inId);
+    setSelected(null);
   }
 
   function undoSwap(out: number) {
@@ -245,6 +252,20 @@ function DeadlineCheck({ data, profile, teamId }: { data: DeadlineData; profile:
             </div>
           )}
           {editing && <p className="mt-3 text-center text-xs text-faint">Tap a player to make him captain or sell him.</p>}
+          {editing && (
+            <Suggestions
+              suggestions={suggestTransfers({
+                squad,
+                players: data.players,
+                budgetFor,
+                locked: new Set(complete.flatMap((x) => [x.out, x.in])),
+                profile,
+              })}
+              freeTransfers={ft}
+              planned={complete.length}
+              onUse={applySuggestion}
+            />
+          )}
         </section>
 
         <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start xl:col-span-5">
@@ -637,4 +658,134 @@ async function recordOnSui(teamId: number, gw: number, fingerprint: string) {
   const body = await res.json();
   if (!res.ok) throw new Error(body.error ?? "Couldn't record the lock on Sui");
   return body as { digest: string; network: string; explorerUrl: string };
+}
+
+/** Weak spots in the squad, each with affordable replacements and the numbers behind them. */
+function Suggestions({
+  suggestions,
+  freeTransfers,
+  planned,
+  onUse,
+}: {
+  suggestions: Suggestion[];
+  freeTransfers: number;
+  planned: number;
+  onUse: (out: number, inId: number) => void;
+}) {
+  const free = Math.max(0, freeTransfers - planned);
+  return (
+    <Panel
+      className="mt-5"
+      title="Suggested transfers"
+      subtitle="Your weakest spots, and who could replace them"
+      action={<CountBadge tone={suggestions.length ? "warning" : "good"}>{suggestions.length ? `${suggestions.length} weak spot${suggestions.length > 1 ? "s" : ""}` : "Squad looks fine"}</CountBadge>}
+    >
+      {suggestions.length === 0 ? (
+        <p className="px-5 py-6 text-sm text-muted">No move clearly beats what you have over the next 3 gameweeks. Rolling the transfer is a fair call.</p>
+      ) : (
+        <>
+          <p className="border-b border-line px-5 py-3 text-xs text-muted">
+            {free > 0 ? `You have ${free} free transfer${free > 1 ? "s" : ""} left. ` : "No free transfers left: each move costs 4 pts. "}
+            Options are ranked by points expected over the next 3 gameweeks (recent form and season average, adjusted for fixture difficulty). Only take a move if its gain beats the cost. You decide; the verdict checks whatever you pick.
+          </p>
+          <ul className="divide-y divide-line">
+            {suggestions.map((s) => (
+              <li key={s.out.id} className="px-5 py-4">
+                <div className="flex items-start gap-3">
+                  <IconTile tone={s.urgent ? "warning" : "neutral"} icon={s.urgent ? AlertTriangle : ArrowDownUp} />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold">Replace {s.out.name}</p>
+                    <p className="text-xs text-muted">
+                      {s.reason} · <span className="num">{s.outEst.toFixed(1)}</span> pts expected over 3 GWs
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                  {s.options.map((o) => (
+                    <div key={o.player.id} className="flex min-w-0 flex-col rounded-2xl bg-fg/[0.03] p-3 ring-1 ring-line">
+                      <div className="flex items-center gap-2.5">
+                        <Jersey team={o.player.team} code={o.player.teamCode} pos={o.player.pos} size={34} />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold">{o.player.name}</p>
+                          <p className="num text-xs text-muted">
+                            {o.player.team} · £{o.player.price.toFixed(1)}m
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mt-2.5 flex items-baseline gap-1.5">
+                        <span className="num text-xl font-semibold tracking-tight">{o.est.toFixed(1)}</span>
+                        <span className="text-xs text-muted">pts in 3 GWs</span>
+                        <span className={`num ml-auto text-xs font-semibold ${o.gain > 0 ? "text-good" : "text-faint"}`}>
+                          {o.gain > 0 ? "+" : ""}
+                          {o.gain.toFixed(1)}
+                        </span>
+                      </div>
+                      <dl className="num mt-1 flex gap-3 text-[11px] text-muted">
+                        <div>
+                          <dt className="inline">Season avg </dt>
+                          <dd className="inline font-semibold text-text">{o.player.ppg.toFixed(1)}</dd>
+                        </div>
+                        <div>
+                          <dt className="inline">Form </dt>
+                          <dd className="inline font-semibold text-text">{o.player.form.toFixed(1)}</dd>
+                        </div>
+                        <div>
+                          <dt className="inline">Owned </dt>
+                          <dd className="inline font-semibold text-text">{o.player.selectedBy}%</dd>
+                        </div>
+                      </dl>
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {o.player.run.map((gw, i) =>
+                          gw.length === 0 ? (
+                            <span key={i} className="rounded-md bg-fg/[0.06] px-1.5 py-0.5 text-[10px] text-faint">
+                              Blank
+                            </span>
+                          ) : (
+                            gw.map((f, j) => {
+                              const c = FDR[f.difficulty] ?? FDR[3];
+                              return (
+                                <span
+                                  key={`${i}-${j}`}
+                                  className="rounded-md px-1.5 py-0.5 text-[10px] font-bold"
+                                  style={{ background: c.bg, color: c.fg }}
+                                  title={`Difficulty ${f.difficulty} of 5`}
+                                >
+                                  {f.opponent} ({f.home ? "H" : "A"})
+                                </span>
+                              );
+                            })
+                          ),
+                        )}
+                      </div>
+                      {o.tags.length > 0 && (
+                        <ul className="mt-2 space-y-1">
+                          {o.tags.slice(0, 3).map((t) => (
+                            <li
+                              key={t.text}
+                              className={`text-[11px] leading-snug ${t.tone === "warn" ? "text-warn" : t.tone === "good" ? "text-good" : "text-muted"}`}
+                            >
+                              {t.text}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      <button
+                        onClick={() => onUse(s.out.id, o.player.id)}
+                        className="mt-auto w-full rounded-lg bg-fg/[0.07] py-2 text-xs font-semibold transition hover:bg-volt hover:text-neutral-950 [&:not(:first-child)]:mt-3"
+                      >
+                        Use this
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </li>
+            ))}
+          </ul>
+          <p className="border-t border-line px-5 py-3 text-[11px] text-faint">
+            Estimates use today&apos;s prices; your selling price can be a little lower. They come from form, season average and fixtures: a guide, not a guarantee.
+          </p>
+        </>
+      )}
+    </Panel>
+  );
 }

@@ -1,6 +1,8 @@
 import "server-only";
 import { getBootstrap, getFixtures, getHistory, getPicks, type RawHistory } from "./api";
-import type { DeadlineData, Fixture, SquadPlayer } from "./types";
+import type { DeadlineData, Fixture, FixtureRef, SquadPlayer } from "./types";
+
+const RUN_LENGTH = 3;
 
 const MAX_FREE_TRANSFERS = 5;
 
@@ -10,9 +12,12 @@ export async function buildDeadline(id: number): Promise<DeadlineData | null> {
   const latest = history.current.at(-1);
   if (!next || !latest) return null;
 
-  const [picks, fixtures] = await Promise.all([getPicks(id, latest.event), getFixtures(next.id)]);
+  const runGws = Array.from({ length: RUN_LENGTH }, (_, i) => next.id + i).filter((gw) => gw <= 38);
+  const [picks, ...runFixtures] = await Promise.all([getPicks(id, latest.event), ...runGws.map((gw) => getFixtures(gw))]);
+  const fixtures = runFixtures[0];
   const teamShort = new Map(boot.teams.map((t) => [t.id, t.short]));
   const fixtureFor = (teamId: number) => describeFixture(fixtures, teamId, teamShort);
+  const runFor = (teamId: number) => runFixtures.map((fx) => describeAll(fx, teamId, teamShort));
   const byId = new Map(boot.players.map((p) => [p.id, p]));
 
   const squad: SquadPlayer[] = picks.picks
@@ -25,6 +30,7 @@ export async function buildDeadline(id: number): Promise<DeadlineData | null> {
         isVice: pick.is_vice_captain,
         benched: pick.position > 11,
         fixture: fixtureFor(p.teamId),
+        run: runFor(p.teamId),
       };
     })
     .filter((p): p is SquadPlayer => p !== null);
@@ -34,8 +40,17 @@ export async function buildDeadline(id: number): Promise<DeadlineData | null> {
     squad,
     bank: latest.bank / 10,
     estimatedFreeTransfers: estimateFreeTransfers(history),
-    players: boot.players.map((p) => ({ ...p, fixture: fixtureFor(p.teamId) })),
+    players: boot.players.map((p) => ({ ...p, fixture: fixtureFor(p.teamId), run: runFor(p.teamId) })),
   };
+}
+
+function describeAll(fixtures: Fixture[], teamId: number, teamShort: Map<number, string>): FixtureRef[] {
+  return fixtures
+    .filter((f) => f.home === teamId || f.away === teamId)
+    .map((f) => {
+      const home = f.home === teamId;
+      return { opponent: teamShort.get(home ? f.away : f.home) ?? "", home, difficulty: home ? f.homeDifficulty : f.awayDifficulty };
+    });
 }
 
 function describeFixture(fixtures: Fixture[], teamId: number, teamShort: Map<number, string>) {

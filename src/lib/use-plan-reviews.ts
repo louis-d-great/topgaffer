@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ManagerProfile } from "./fpl/types";
 import { reviewPlan, type PlanReview } from "./plan-review";
 import { usePlans, useRestorePlans } from "./use-plans";
@@ -55,7 +55,27 @@ export function usePlanReviews(teamId: number | null, profile: ManagerProfile | 
       .sort((a, b) => b.gw - a.gw);
   }, [finished, live, profile]);
 
-  const { ledger, rememberNote } = memory;
+  const { ledger, rememberNote, rememberPlan } = memory;
+
+  // A plan whose memory never reached Walrus (e.g. locked during an outage) is sent again.
+  // Only plans locked in this browser (they hold the salt) are resent; restored ones are already on Walrus.
+  const resent = useRef(new Set<string>());
+  useEffect(() => {
+    if (!teamId || !profile) return;
+    const name = (id: number) => profile.players[id]?.name ?? `player ${id}`;
+    for (const p of Object.values(plans)) {
+      const key = `gw${p.gw}-plan-${p.fingerprint.slice(0, 12)}`;
+      const saved = ledger[key];
+      if (!p.salt || p.restored || resent.current.has(key) || (saved && saved.status !== "failed" && saved.status !== "not_found")) continue;
+      resent.current.add(key);
+      const moves = p.transfersIn.map((id, i) => `${name(id)} in for ${name(p.transfersOut[i])}`).join(", ");
+      rememberPlan({
+        teamName: profile.teamName,
+        summary: `Captain ${name(p.captain)}. ${moves ? `Transfers: ${moves}` : "No transfers"}${p.hitCost ? ` (−${p.hitCost} hit)` : ""}.`,
+        plan: p,
+      }).catch(() => resent.current.delete(key));
+    }
+  }, [plans, ledger, rememberPlan, teamId, profile]);
   useEffect(() => {
     if (!teamId || !profile) return;
     for (const r of reviews) {

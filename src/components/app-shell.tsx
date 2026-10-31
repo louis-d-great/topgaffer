@@ -58,9 +58,10 @@ export function Logo({ compact = false }: { compact?: boolean }) {
   return (
     <span className="inline-flex items-center gap-2">
       <span className="relative grid size-9 place-items-center rounded-xl bg-volt text-neutral-950 shadow-[0_0_24px_-6px_var(--color-volt)]">
-        <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
-          <path d="M5 8h14M12 8v11" />
-          <circle cx="12" cy="8" r="0.6" fill="currentColor" />
+        {/* The mark: a T drawn as a goal frame (crossbar, posts, stem) with the ball. */}
+        <svg viewBox="0 0 48 48" className="size-6" aria-hidden>
+          <path d="M9 20V13h30v7M24 13v23" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="35" cy="33" r="4.2" fill="currentColor" />
         </svg>
       </span>
       {!compact && (

@@ -69,6 +69,7 @@ interface RawBootstrap {
     element_type: number;
     now_cost: number;
     form: string;
+    points_per_game: string;
     ep_next: string | null;
     total_points: number;
     event_points: number;
@@ -113,6 +114,7 @@ export async function getBootstrap(): Promise<Bootstrap> {
       price: p.now_cost / 10,
       form: Number(p.form) || 0,
       xp: Number(p.ep_next) || 0,
+      ppg: Number(p.points_per_game) || 0,
       totalPoints: p.total_points,
       lastGwPoints: p.event_points,
       selectedBy: Number(p.selected_by_percent) || 0,

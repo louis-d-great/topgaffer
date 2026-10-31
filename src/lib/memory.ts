@@ -83,7 +83,8 @@ export async function remember(teamId: number, items: MemoryItem[]) {
   const res = await withRetry(() =>
     memwal().rememberBulkAsync(
       items.map((i) => ({ text: i.text, namespace: ns })),
-      { idempotencyKey: `${ns}:${batchKey}` },
+      // The hour bucket lets a batch that failed (e.g. a Walrus outage) be retried later; the ledger already stops real duplicates.
+      { idempotencyKey: `${ns}:${batchKey}:${Math.floor(Date.now() / 3_600_000)}` },
     ),
   );
   return items.map((item, i) => ({ key: item.key, jobId: res.job_ids[i] }));

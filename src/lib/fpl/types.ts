@@ -13,6 +13,8 @@ export interface Player {
   form: number;
   /** FPL's expected points for the next gameweek. */
   xp: number;
+  /** Season points per game played. */
+  ppg: number;
   totalPoints: number;
   lastGwPoints: number;
   selectedBy: number;
@@ -169,11 +171,19 @@ export interface ExpertDetail {
   };
 }
 
+export interface FixtureRef {
+  opponent: string;
+  home: boolean;
+  difficulty: number;
+}
+
 export interface SquadPlayer extends Player {
   isCaptain: boolean;
   isVice: boolean;
   benched: boolean;
-  fixture: { opponent: string; home: boolean; difficulty: number } | null;
+  fixture: FixtureRef | null;
+  /** The next three gameweeks' fixtures (a blank gameweek is an empty list; a double has two). */
+  run: FixtureRef[][];
 }
 
 export interface DeadlineData {
@@ -181,7 +191,7 @@ export interface DeadlineData {
   squad: SquadPlayer[];
   bank: number;
   estimatedFreeTransfers: number;
-  players: (Player & { fixture: SquadPlayer["fixture"] })[];
+  players: (Player & { fixture: SquadPlayer["fixture"]; run: FixtureRef[][] })[];
 }
 
 /** Where an expert comes from: today's leaderboard, a long track record, or a following. */
