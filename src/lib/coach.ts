@@ -45,12 +45,14 @@ export async function* coachAnswer(
   expertRefs: { id: number; name: string }[],
 ): AsyncGenerator<CoachEvent> {
   const question = history.at(-1)?.text ?? "";
-  const [profile, deadline, memories, experts] = await Promise.all([
+  const [profile, deadline, recalled, experts] = await Promise.all([
     buildProfile(teamId),
     buildDeadline(teamId).catch(() => null),
-    recall(teamId, question, 5).catch(() => []),
+    recall(teamId, question, 10).catch(() => []),
     Promise.all(expertRefs.slice(0, 10).map((e) => buildProfile(e.id).then((p) => ({ ...p, label: e.name })).catch(() => null))),
   ]);
+  // A retried save can leave the same memory on Walrus twice; show each one once.
+  const memories = recalled.filter((m, i) => recalled.findIndex((x) => x.text === m.text) === i).slice(0, 5);
   yield { type: "memories", items: memories.map((m) => ({ text: m.text, blobId: m.blobId })) };
 
   const data = describe(
